@@ -1,0 +1,7 @@
+[package]
+name = "villagekit-engine"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy = "0.14.2"
