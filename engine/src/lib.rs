@@ -1,14 +1,21 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+use bevy::prelude::*;
+use bevy_infinite_grid::InfiniteGridPlugin;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod part;
+mod sandbox;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+pub use crate::part::{spawn_part, Part, PartInstance, PartMaterial, PartMesh, PartSpec};
+
+pub struct EnginePlugin;
+
+impl Plugin for EnginePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins((
+            DefaultPlugins,
+            MeshPickingPlugin,
+            bevy_editor_cam::DefaultEditorCamPlugins,
+            InfiniteGridPlugin,
+        ))
+        .add_systems(Startup, crate::sandbox::setup_sandbox);
     }
 }
