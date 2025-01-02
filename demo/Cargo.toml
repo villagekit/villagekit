@@ -5,6 +5,7 @@ edition.workspace = true
 
 [dependencies]
 bevy = { version = "0.15.0", features = ["dynamic_linking"] }
+bevy_editor_cam = "0.5.0"
 uuid = "1.11.0"
 
 ## https://bevyengine.org/learn/quick-start/getting-started/setup/

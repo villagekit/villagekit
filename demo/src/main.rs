@@ -1,11 +1,16 @@
 use std::collections::BTreeMap;
 
 use bevy::prelude::*;
+use bevy_editor_cam::prelude::EditorCam;
 use uuid::Uuid;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((
+            DefaultPlugins,
+            MeshPickingPlugin,
+            bevy_editor_cam::DefaultEditorCamPlugins,
+        ))
         .add_systems(Startup, setup_sandbox)
         .add_systems(Startup, setup_model)
         .run();
@@ -40,6 +45,7 @@ fn setup_sandbox(
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
+        EditorCam::default(),
     ));
 
     // sandbox
