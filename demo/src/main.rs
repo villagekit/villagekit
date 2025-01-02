@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use bevy::prelude::*;
 use bevy_editor_cam::prelude::EditorCam;
+use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridPlugin, InfiniteGridSettings};
 use uuid::Uuid;
 
 fn main() {
@@ -10,6 +11,7 @@ fn main() {
             DefaultPlugins,
             MeshPickingPlugin,
             bevy_editor_cam::DefaultEditorCamPlugins,
+            InfiniteGridPlugin,
         ))
         .add_systems(Startup, setup_sandbox)
         .add_systems(Startup, setup_model)
@@ -47,6 +49,15 @@ fn setup_sandbox(
         Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
         EditorCam::default(),
     ));
+
+    // grid
+    commands.spawn((InfiniteGridBundle {
+        settings: InfiniteGridSettings {
+            fadeout_distance: 1000.,
+            ..Default::default()
+        },
+        ..Default::default()
+    },));
 
     // sandbox
     commands.spawn((
