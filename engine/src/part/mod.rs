@@ -1,69 +1,131 @@
 use bevy::prelude::*;
+use ordered_float::OrderedFloat;
 use std::collections::BTreeMap;
-use uuid::Uuid;
 
-use crate::sandbox::Sandbox;
+use crate::{asset::AssetStore, sandbox::Sandbox};
+
+pub struct PartPlugin;
+
+impl Plugin for PartPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(AssetStore::<PartMesh, Mesh, _>::new(|key: &PartMesh| {
+            key.mesh()
+        }))
+        .insert_resource(AssetStore::<PartMaterial, StandardMaterial, _>::new(
+            |key: &PartMaterial| key.material(),
+        ));
+    }
+}
+
+#[derive(Component, Default)]
+pub struct PartType;
+
+#[derive(Component, Default)]
+pub struct PartSpec;
 
 #[derive(Component, Default)]
 #[require(Transform, Visibility)]
-pub struct Part;
+pub struct PartInstance;
 
-#[derive(Clone, Default)]
-pub struct PartSpec {
-    pub meshes: BTreeMap<Uuid, PartMesh>,
-    pub materials: BTreeMap<Uuid, PartMaterial>,
+#[derive(Component, Default)]
+pub struct PartRender {
+    pub meshes: BTreeMap<String, PartMesh>,
+    pub materials: BTreeMap<String, PartMaterial>,
     pub instances: Vec<PartInstance>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Component, Default)]
+pub struct PartRenderHandles {
+    pub mesh_handles: BTreeMap<String, Handle<Mesh>>,
+    pub material_handles: BTreeMap<String, Handle<StandardMaterial>>,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub enum PartMesh {
     Cuboid {
-        x_length: f32,
-        y_length: f32,
-        z_length: f32,
+        x_length: OrderedFloat<f32>,
+        y_length: OrderedFloat<f32>,
+        z_length: OrderedFloat<f32>,
     },
 }
 
-#[derive(Debug, Clone)]
+impl PartMesh {
+    fn mesh(&self) -> Mesh {
+        match self {
+            &PartMesh::Cuboid {
+                x_length,
+                y_length,
+                z_length,
+            } => Cuboid::new(*x_length, *y_length, *z_length).into(),
+        }
+    }
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub enum PartColor {
+    Hsla {
+        hue: OrderedFloat<f32>,
+        saturation: OrderedFloat<f32>,
+        lightness: OrderedFloat<f32>,
+        alpha: OrderedFloat<f32>,
+    },
+}
+
+impl From<PartColor> for Color {
+    fn from(value: PartColor) -> Self {
+        match value {
+            PartColor::Hsla {
+                hue,
+                saturation,
+                lightness,
+                alpha,
+            } => Color::hsla(*hue, *saturation, *lightness, *alpha),
+        }
+    }
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub enum PartMaterial {
-    Color { color: Color },
+    Color(PartColor),
+}
+
+impl PartMaterial {
+    fn material(&self) -> StandardMaterial {
+        match self {
+            PartMaterial::Color(color) => StandardMaterial::from_color(color.clone()),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
-pub struct PartInstance {
-    pub mesh: Option<Uuid>,
-    pub material: Option<Uuid>,
+pub struct PartSubInstance {
+    pub mesh: Option<Handle<Mesh>>,
+    pub material: Option<Handle<StandardMaterial>>,
     pub transform: Option<Transform>,
-    pub children: Option<Vec<PartInstance>>,
+    pub children: Option<Vec<PartSubInstance>>,
 }
 
-struct SpawnPart {
-    part_spec: PartSpec,
+struct SpawnPartRender {
+    render: PartRender,
 }
 
-impl Command for SpawnPart {
+impl Command for SpawnPartRender {
     fn apply(self, world: &mut World) {
-        world.resource_scope(|_world, mut meshes: Mut<Assets<Mesh>>| {
-            for (id, part_mesh) in self.part_spec.meshes {
-                let mesh: Mesh = match part_mesh {
-                    PartMesh::Cuboid {
-                        x_length,
-                        y_length,
-                        z_length,
-                    } => Cuboid::new(x_length, y_length, z_length).into(),
-                };
-                let mesh_handle = Handle::weak_from_u128(id.as_u128());
-                meshes.insert(&mesh_handle, mesh);
-            }
+        world.resource_scope(|world, mut assets: Mut<Assets<Mesh>>| {
+            world.resource_scope(|_world, mut store: Mut<AssetStore<PartMesh, Mesh, _>>| {
+                for (id, mesh) in self.render.meshes {
+                    store.get_or_create(mesh, &mut assets);
+                }
+            });
         });
-        world.resource_scope(|_world, mut materials: Mut<Assets<StandardMaterial>>| {
-            for (id, part_material) in self.part_spec.materials {
-                let material = match part_material {
-                    PartMaterial::Color { color } => StandardMaterial::from_color(color),
-                };
-                let material_handle = Handle::weak_from_u128(id.as_u128());
-                materials.insert(&material_handle, material);
-            }
+        world.resource_scope(|world, mut assets: Mut<Assets<StandardMaterial>>| {
+            world.resource_scope(
+                |_world, mut store: Mut<AssetStore<PartMaterial, StandardMaterial, _>>| {
+                    for (id, material) in self.render.materials {
+                        store.get_or_create(material, &mut assets);
+                    }
+                },
+            );
         });
 
         let sandbox = world

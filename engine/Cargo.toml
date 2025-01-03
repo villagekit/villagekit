@@ -6,6 +6,7 @@ edition.workspace = true
 [dependencies]
 bevy_editor_cam = "0.5.0"
 bevy_infinite_grid = "0.14.0"
+ordered-float = "4.6.0"
 uuid = "1.11.0"
 
 [dependencies.bevy]
