@@ -2,8 +2,9 @@ use std::collections::BTreeMap;
 
 use bevy::prelude::*;
 
-use uuid::Uuid;
-use villagekit_engine::{spawn_part, EnginePlugin, PartInstance, PartMaterial, PartMesh, PartSpec};
+use villagekit_engine::{
+    spawn_part_render, EnginePlugin, PartColor, PartMaterial, PartMesh, PartRender, PartSubInstance,
+};
 
 fn main() {
     App::new()
@@ -13,33 +14,34 @@ fn main() {
 }
 
 fn setup_model(mut commands: Commands) {
-    let cube_id = Uuid::new_v4();
-    let part_meshes = BTreeMap::from([(
-        cube_id,
+    let meshes = BTreeMap::from([(
+        "cube".into(),
         PartMesh::Cuboid {
-            x_length: 1.0,
-            y_length: 1.0,
-            z_length: 10.0,
+            x_length: 1.0.into(),
+            y_length: 1.0.into(),
+            z_length: 10.0.into(),
         },
     )]);
-    let white_id = Uuid::new_v4();
-    let part_materials = BTreeMap::from([(
-        white_id,
-        PartMaterial::Color {
-            color: Color::WHITE,
-        },
+    let materials = BTreeMap::from([(
+        "white".into(),
+        PartMaterial::Color(PartColor::Hsla {
+            hue: 0.0.into(),
+            saturation: 1.0.into(),
+            lightness: 0.5.into(),
+            alpha: 0.5.into(),
+        }),
     )]);
-    let part_instances = vec![PartInstance {
-        mesh: Some(cube_id),
-        material: Some(white_id),
+    let instances = vec![PartSubInstance {
+        mesh: Some("cube".into()),
+        material: Some("white".into()),
         transform: Some(Transform::from_xyz(0.0, 0.5, 0.0)),
         children: None,
     }];
-    let part_spec = PartSpec {
-        meshes: part_meshes,
-        materials: part_materials,
-        instances: part_instances,
+    let render = PartRender {
+        meshes,
+        materials,
+        instances,
     };
 
-    spawn_part(part_spec, commands.reborrow());
+    spawn_part_render(render, commands.reborrow());
 }

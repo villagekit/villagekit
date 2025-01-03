@@ -5,48 +5,38 @@ use std::hash::Hash;
 use std::sync::Arc;
 
 #[derive(Resource)]
-pub(crate) struct AssetStore<K, V, F>
+pub(crate) struct AssetStore<K, V>
 where
     K: Eq + Hash + Clone,
-    V: Asset,
-    F: Fn(&K) -> V,
+    V: Asset + From<K>,
 {
     map: HashMap<K, Handle<V>>,
-    create: F,
 }
 
-impl<K, V, F> AssetStore<K, V, F>
+impl<K, V> AssetStore<K, V>
 where
     K: Eq + Hash + Clone,
-    V: Asset,
-    F: Fn(&K) -> V,
+    V: Asset + From<K>,
 {
-    pub fn new(create: F) -> Self {
+    pub fn new() -> Self {
         Self {
             map: HashMap::new(),
-            create,
         }
     }
 
-    /// Get or create an asset by key, using the store's creation function.
-    ///
-    /// - `key`: The parameter describing this asset (e.g. mesh shape, material properties, etc.).
-    /// - `assets`: A mutable reference to Bevy's `Assets<T>`.
-    ///
-    /// Returns a `Handle<V>` to the asset.
-    pub fn get_or_create(&mut self, key: K, assets: &mut Assets<V>) -> Handle<V> {
-        // If we already have a handle for this key, return it
-        if let Some(existing_handle) = self.map.get(&key) {
-            return existing_handle.clone_weak();
+    pub fn insert(&mut self, key: K, assets: &mut Assets<V>) -> Handle<V> {
+        if let Some(handle) = self.map.get(&key) {
+            return handle.clone();
         }
 
-        // Otherwise, create a new asset, store it in `assets`,
-        // and record the handle in our map.
-        let new_asset = (self.create)(&key);
-        let new_handle = assets.add(new_asset);
-        self.map.insert(key, new_handle.clone_weak());
+        let asset: V = key.clone().into();
+        let handle = assets.add(asset);
+        self.map.insert(key, handle.clone());
+        handle
+    }
 
-        new_handle
+    pub fn get(&mut self, key: &K) -> Option<Handle<V>> {
+        self.map.get(key).cloned()
     }
 
     /// Removes all assets from the store that are no longer strongly referenced
