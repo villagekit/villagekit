@@ -1,10 +1,48 @@
 # VillageKit
 
+Village Kit is an open source code-as-CAD system for makers.
+
+There are 4 types of products (so far):
+
+- Solid: A 3d object printed or CNC'd
+- Sheet: A 2d object cut from sheet material
+- Stock: An off-the-shelf product
+- Assembly: A composition of other products
+
+Products are written as [Rimu code](https://rimu.dev).
+
+Products can be shared and imported, similar to npm.
+
 ## Notes
 
 ???
 
-- `Product`
+Data types:
+
+- `ProductObject`
+  - `design`
+  - `params`
+- `ProductDesign`
+  - `::Solid`
+    - `solid(params => 3d)`
+  - `::Sheet`
+    - `sheet(params => 2d)`
+  - `::Stock`
+    - `stock(params => meshes, materials, instances)`
+  - `::Assembly`
+    - `assembly(params => [products])`
+- `ProductTransform`
+  - `translate`
+  - `rotate`
+  - `scale`
+- `ProductDesignCode`
+  - `path`
+  - `code`
+- `ProductDesignRender`
+  - `meshes`
+  - `materials`
+  - `instances`
+
   - `[PartType]`: e.g. "grid beam"
     - `[Part]`: `Transform`
       - `PartSpec`: e.g. "a grid beam of length 10"
@@ -18,20 +56,36 @@
 Data Flow:
 
 - Load workspace
-- See products and parts in workspace
+- List products in workspace
+- Load product metadata (`villagekit.toml`)
 - Load product
-  - Load metadata file (`villagekit.toml`)
   - Load and parse entry code file
     - Scan for imports, recursively load and parse imports
       - If part, load part
     - Resolve into one AST document.
-  - Send parameters to product, receive parts
-- Load part
-  - Load metadata file (`villagekit.toml`)
-  - Load and parse entry code file
-  - Send parameters to part, receive meshes, materials, and instances
+  - Send parameters to product, receive result
 
-Example product: `chair.rimu`
+User code class types:
+
+- Parametric
+  - `parameters`
+  - `presets`
+- Transformable
+  - `transform`
+- ProductBase: Parametric, Transformable
+- Solid: ProductBase
+  - `solid(params => 3d)`
+- Sheet: ProductBase
+  - `sheet(params => 2d)`
+- Stock: ProductBase
+  - `stock(params => meshes, materials, instances)`
+- Assembly: ProductBase
+  - `assembly(params => [products])`
+
+
+Example assembly product: `chair.rimu`
+
+TODO: question: Should assembly products be a class too?
 
 ```
 def GridBeam = import("@villagekit/gridbeam")
@@ -156,7 +210,7 @@ parts: (parameters) =>
         z: seatHeight - 1
 ```
 
-Example part: `gridbeam.rimu`
+Example stock part: `gridbeam.rimu`
 
 ```
 class GridBeam
