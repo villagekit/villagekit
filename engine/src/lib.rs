@@ -3,9 +3,11 @@ use bevy_infinite_grid::InfiniteGridPlugin;
 use part::PartPlugin;
 
 mod assets;
+mod entry;
 mod part;
 mod product;
 mod sandbox;
+mod workspace;
 
 pub use crate::part::{
     spawn_part_render, PartColor, PartInstance, PartMaterial, PartMesh, PartRender, PartSpec,

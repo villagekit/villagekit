@@ -1,6 +1,8 @@
 # VillageKit
 
-## Data Model
+## Notes
+
+???
 
 - `Product`
   - `[PartType]`: e.g. "grid beam"
@@ -12,6 +14,22 @@
       - `[PartMaterialParams]`
         - `PartMaterialHandle`
       - `[PartInstance]`: Transform
+
+Data Flow:
+
+- Load workspace
+- See products and parts in workspace
+- Load product
+  - Load metadata file (`villagekit.toml`)
+  - Load and parse entry code file
+    - Scan for imports, recursively load and parse imports
+      - If part, load part
+    - Resolve into one AST document.
+  - Send parameters to product, receive parts
+- Load part
+  - Load metadata file (`villagekit.toml`)
+  - Load and parse entry code file
+  - Send parameters to part, receive meshes, materials, and instances
 
 Example product: `chair.rimu`
 

@@ -2,6 +2,8 @@ use bevy::{prelude::*, utils::HashMap};
 use ordered_float::OrderedFloat;
 use std::collections::BTreeMap;
 
+mod eval;
+
 use crate::{assets::AssetStore, sandbox::Sandbox};
 
 pub struct PartPlugin;
