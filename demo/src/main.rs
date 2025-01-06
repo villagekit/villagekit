@@ -1,7 +1,6 @@
-use std::collections::BTreeMap;
-
 use bevy::prelude::*;
 
+use serde_json::{from_str, from_value};
 use villagekit_engine::*;
 
 fn main() {
@@ -12,34 +11,42 @@ fn main() {
 }
 
 fn setup_model(mut commands: Commands) {
-    let meshes = BTreeMap::from([(
-        "cube".into(),
-        RenderableMesh::Cuboid {
-            x_length: 1.0.into(),
-            y_length: 1.0.into(),
-            z_length: 10.0.into(),
-        },
-    )]);
-    let materials = BTreeMap::from([(
-        "white".into(),
-        RenderableMaterial::Color(RenderableColor::Hsla {
-            hue: 0.0.into(),
-            saturation: 1.0.into(),
-            lightness: 0.5.into(),
-            alpha: 0.5.into(),
-        }),
-    )]);
-    let instances = vec![RenderableInstance {
-        mesh: Some("cube".into()),
-        material: Some("white".into()),
-        transform: Some(Transform::from_xyz(0.0, 0.5, 0.0)),
-        children: None,
-    }];
-    let renderable = Renderable {
-        meshes,
-        materials,
-        instances,
-    };
+    let renderable_json = r#"
+        {
+            "meshes": {
+                "cube": {
+                    "type": "Cuboid",
+                    "x_length": 1,
+                    "y_length": 1,
+                    "z_length": 10
+                }
+            },
+            "materials": {
+                "red": {
+                    "type": "Color",
+                    "color": {
+                        "type": "Hsla",
+                        "hue": 0,
+                        "saturation": 1,
+                        "lightness": 0.5,
+                        "alpha": 1
+                    }
+                }
+            },
+            "instances": [
+                {
+                    "mesh": "cube",
+                    "material": "red",
+                    "transform": {
+                        "translation": [0, 0, 0],
+                        "rotation": [0, 0, 0, 1],
+                        "scale": [1, 1, 1]
+                    }
+                }
+            ]
+        }"#;
+    let renderable_value = from_str(renderable_json).unwrap();
+    let renderable: Renderable = from_value(renderable_value).unwrap();
 
     spawn_renderable(renderable, commands.reborrow());
 }

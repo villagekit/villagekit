@@ -17,6 +17,7 @@ pub struct Renderable {
 pub struct RenderableObject;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[serde(tag = "type")]
 pub enum RenderableMesh {
     Cuboid {
         x_length: OrderedFloat<f32>,
@@ -44,6 +45,7 @@ impl RenderableMesh {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[serde(tag = "type")]
 pub enum RenderableColor {
     Hsla {
         hue: OrderedFloat<f32>,
@@ -67,14 +69,15 @@ impl From<RenderableColor> for Color {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[serde(tag = "type")]
 pub enum RenderableMaterial {
-    Color(RenderableColor),
+    Color { color: RenderableColor },
 }
 
 impl RenderableMaterial {
     fn material(&self) -> StandardMaterial {
         match self {
-            RenderableMaterial::Color(color) => StandardMaterial::from_color(color.clone()),
+            RenderableMaterial::Color { color } => StandardMaterial::from_color(color.clone()),
         }
     }
 }
@@ -87,9 +90,13 @@ impl From<RenderableMaterial> for StandardMaterial {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RenderableInstance {
+    #[serde(default)]
     pub mesh: Option<String>,
+    #[serde(default)]
     pub material: Option<String>,
+    #[serde(default)]
     pub transform: Option<Transform>,
+    #[serde(default)]
     pub children: Option<Vec<RenderableInstance>>,
 }
 
