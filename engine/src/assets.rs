@@ -8,7 +8,7 @@ use std::sync::Arc;
 pub(crate) struct AssetStore<K, V>
 where
     K: Eq + Hash + Clone,
-    V: Asset + From<K>,
+    V: Asset,
 {
     map: HashMap<K, Handle<V>>,
 }
@@ -16,7 +16,7 @@ where
 impl<K, V> AssetStore<K, V>
 where
     K: Eq + Hash + Clone,
-    V: Asset + From<K>,
+    V: Asset,
 {
     pub fn new() -> Self {
         Self {
@@ -24,13 +24,12 @@ where
         }
     }
 
-    pub fn insert(&mut self, key: K, assets: &mut Assets<V>) -> Handle<V> {
+    pub fn insert(&mut self, key: K, value: V, assets: &mut Assets<V>) -> Handle<V> {
         if let Some(handle) = self.map.get(&key) {
             return handle.clone();
         }
 
-        let asset: V = key.clone().into();
-        let handle = assets.add(asset);
+        let handle = assets.add(value);
         self.map.insert(key, handle.clone());
         handle
     }

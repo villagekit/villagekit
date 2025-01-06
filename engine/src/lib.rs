@@ -1,18 +1,16 @@
+use assets::AssetStore;
 use bevy::prelude::*;
 use bevy_infinite_grid::InfiniteGridPlugin;
-use part::PartPlugin;
 
 mod assets;
-mod entry;
-mod part;
+mod params;
 mod product;
+mod render;
 mod sandbox;
 mod workspace;
 
-pub use crate::part::{
-    spawn_part_render, PartColor, PartInstance, PartMaterial, PartMesh, PartRender, PartSpec,
-    PartSubInstance,
-};
+pub use crate::product::*;
+pub use crate::render::*;
 
 pub struct EnginePlugin;
 
@@ -24,7 +22,8 @@ impl Plugin for EnginePlugin {
             bevy_editor_cam::DefaultEditorCamPlugins,
             InfiniteGridPlugin,
         ))
-        .add_plugins(PartPlugin)
+        .insert_resource(AssetStore::<RenderableMesh, Mesh>::new())
+        .insert_resource(AssetStore::<RenderableMaterial, StandardMaterial>::new())
         .add_systems(Startup, crate::sandbox::setup_sandbox);
     }
 }

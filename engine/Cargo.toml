@@ -6,13 +6,15 @@ edition.workspace = true
 [dependencies]
 bevy_editor_cam = "0.5.0"
 bevy_infinite_grid = "0.14.0"
-ordered-float = "4.6.0"
+ordered-float = { version = "4.6.0", features = ["serde"] }
+serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.134"
 uuid = "1.11.0"
 
 [dependencies.bevy]
 version = "0.15"
 default-features = false
+# https://github.com/bevyengine/bevy/blob/main/docs/cargo_features.md
 features = [
   "bevy_asset",               # Provides asset functionality
   "bevy_color",               # Provides shared color types and operations
@@ -28,4 +30,5 @@ features = [
   "bevy_state",               # Enable built-in global state machines
   "hdr",                      # HDR image format support
   "png",                      # PNG image format support
+  "serialize"                 # Enable serialization support through serde
 ]

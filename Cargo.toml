@@ -2,7 +2,8 @@
 resolver = "2"
 members = [
   "demo",
-  "engine"
+  "engine",
+  "params"
 ]
 
 [workspace.package]

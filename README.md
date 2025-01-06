@@ -78,7 +78,13 @@ User code class types:
 - Sheet: ProductBase
   - `sheet(params => 2d)`
 - Stock: ProductBase
-  - `stock(params => meshes, materials, instances)`
+  - `stock(params => ...`
+    - `3d`: how to render in 3d
+      - `meshes`
+      - `materials`
+      - `instances`
+    - TODO: `2d`: how to render in 2d
+    - TODO: `cut`: how to cut larger sizes to smaller sizes
 - Assembly: ProductBase
   - `assembly(params => [products])`
 
