@@ -89,79 +89,137 @@ User code class types:
 - Assembly: ProductBase
   - `assembly(params => [products])`
 
-
-Example assembly product: `chair.rimu`
-
-TODO: question: Should assembly products be a class too?
+Base math: `math.rimu`
 
 ```
-import
-  Assembly = @std/assembly@1
-  GridBeam = @villagekit/gridbeam@1
-  SmartFasteners = @villagekit/smart-fasteners@1
+let export = Map
+  Vector3
+  Quaternion
 
-export = Chair
+type Vector3: [Num, Num, Num]
+  default = [0, 0, 0]
+
+type Quaternion: [Num, Num, Num, Num]
+  default = [0, 0, 0, 1]
+```
+
+3d object trait: `object-3d.rimu`
+
+```
+let from import("@std/math") = Map
+  Vector3
+  Quaternion
+
+let export = Object3d
+
+struct Transform
+  translation: Vector3
+
+  rotation: Quaternion
+
+  scale: Vector3
+    default = [1, 1, 1]
+
+  fn translate (self, x: Num, y: Num, z: Num): Self =>
+    Self
+      ...self
+      translation = List
+        self.translation.x + x
+        self.translation.y + y
+        self.translation.z + z
+
+trait Object3d
+  transform: Transform
+
+  fn translate (self, x: Num, y: Num, z: Num): Self =>
+    Self
+      ...self
+      transform: self.transform.translate(x, y, z)
+```
+
+Assembly trait: `assembly.rimu`
+
+```
+let Object3d = import("@std/object-3d")
+
+let export = Assembly
+
+type Parts = List(List | Parts)
+  default = []
+
+trait Assembly: Object3d
+  fn parts: Parts
+```
+
+
+Example assembly: `chair.rimu`
+
+```
+let Assembly = import("@std/assembly@1")
+let GridBeam = import("@villagekit/gridbeam@1")
+let SmartFasteners = import("@villagekit/smart-fasteners@1")
+
+let export = Chair
 
 struct Chair: Assembly
-  prop seat_width: Num
-    label 'Seat width'
-    min 5
-    max 10
-    step 5
+  seat_width: Num
+    label = 'Seat width'
+    min = 5
+    max = 10
+    step = 5
 
-  prop seat_depth: Num
-    label 'Seat depth'
-    min 5
-    max 15
+  seat_depth: Num
+    label = 'Seat depth'
+    min = 5
+    max = 15
 
-  prop seat_height: Num
-    label 'Seat height'
-    description 'The height from the ground to the top of the seat'
-    min 5
-    max 15
+  seat_height: Num
+    label = 'Seat height'
+    description = 'The height from the ground to the top of the seat'
+    min = 5
+    max = 15
 
-  prop should_include_back: Bool
+  should_include_back: Bool
     label 'Include back'
 
-  prop back_height: Num
-    label 'Back height',
-    description 'The height from the seat to the top of the backrest'
-    min 5
-    max 10
+  back_height: Num
+    label = 'Back height'
+    description = 'The height from the seat to the top of the backrest'
+    min = 5
+    max = 10
 
-  preset regular
-    label 'Regular (Without Back)'
-    values
+  fn regular(): Self
+    meta label = 'Regular (Without Back)'
+
+    Self
       back_height = 10
       seat_depth = 10
       seat_height = 10
       seat_width = 10
       should_include_back = false
 
-  preset regular_with_back
-    label 'Regular With Back'
-    values
-      back_height = 10
-      seat_depth = 10
-      seat_height = 10
-      seat_width = 10
+  fn regular_with_back(): Self
+    meta label = 'Regular With Back'
+
+    Self
+      ...Self.regular()
       should_include_back = true
 
   plugins = [SmartFasteners()]
 
-  fn parts (self): List<Product> =>
-    let object self =
-      seat_width =
-      seat_depth =
-      seat_height =
-      back_height =
-      should_include_back =
+  fn parts (self) =>
+    let from self = Map
+      seat_width
+      seat_depth
+      seat_height
+      back_height
+      should_include_back
 
     let back_z_beam_end_z = if should_include_back then seat_height + back_height else seat_height
     let seat_panel_start_y = if should_include_back then -1 else 0
     let seat_panel_end_y = if should_include_back then seat_depth - 1 else seat_depth
 
-    list
+    List
       GridPanel.XY
         x: [0, seat_width]
         y: [seat_panel_start_y, seat_panel_end_y]
@@ -215,22 +273,11 @@ struct Chair: Assembly
         z: seat_height - 1
 ```
 
-3d Object base: `3d-object.rimu`
+Renderable struct `renderable.rimu`
 
 ```
-export trait Object3d
-    (Num)
+let export = Renderable
 
-
-  fn translate (self, x: Num, y: Num, z: Num): Self =>
-    Self
-      ...self
-      transform: self.transform.translate(x, y, z)
-```
-
-Stock base: `stock.rimu`
-
-```
 enum Mesh
   case Cuboid
     x_length: Num
@@ -238,37 +285,53 @@ enum Mesh
     z_length: Num
 
 enum Material
-  case Color(Color)
+  case Color
+    color: Color
+
+struct Instance
+  mesh: Str
+  material: Str
+  transform: Transform
+  children: List(Self)
 
 struct Renderable
-  prop meshes: Map<Mesh>
-  prop materials: Map<Material>
-  prop instances: List<Instance>
+  meshes: Map(Mesh)
+  materials: Map(Material)
+  instances: List(Instance)
+```
 
-export trait Stock
-  impl Object3d
+Stock trait: `stock.rimu`
 
-  fn render (self): Renderable =>
-    Self
-      ...self
-      transform: self.transform.translate(x, y, z)
+```
+let Object3d = import("@std/object-3d")
+
+let export = Stock
+
+trait Stock: Object3d
+  fn render (self): Renderable
 ```
 
 Example stock part: `gridbeam.rimu`
 
 ```
-export struct GridBeam
-  impl Stock
+let Stock = import("@std/stock")
 
-  prop length (Num)
+let export = GridBeam
+
+struct GridBeam: Stock
+  length: Num
     label "Length"
     description "The length of the beam in grid units"
 
-  fn X (x: [Num, Num], y: Num, z: Num): Self =>
+  fn X: Self =>
+    meta args = Args
+      x = [Num, Num]
+      y = Num
+      z = Num
     # ...
-  fn Y (x: [Num, Num], y: Num, z: Num): Self =>
+  fn Y (x: Num, y: [Num, Num], z: Num): Self =>
     # ...
-  fn X (x: [Num, Num], y: Num, z: Num): Self =>
+  fn X (x: Num, y: Num, z: [Num, Num]): Self =>
     # ...
 ```
 
