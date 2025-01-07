@@ -95,129 +95,130 @@ Example assembly product: `chair.rimu`
 TODO: question: Should assembly products be a class too?
 
 ```
-import Assembly from "@stdlib/assembly"
-import GridBeam from "@villagekit/gridbeam"
+import
+  Assembly = @std/assembly@1
+  GridBeam = @villagekit/gridbeam@1
+  SmartFasteners = @villagekit/smart-fasteners@1
 
-export Assembly
-  parameters:
-    seat_width:
-      label: 'Seat width'
-      type: 'number'
-      min: 5
-      max: 10
-      step: 5
-    seat_depth:
-      label: 'Seat depth'
-      type: 'number'
-      min: 5
-      max: 15
-    seat_height:
-      label: 'Seat height'
-      description: 'The height from the ground to the top of the seat'
-      type: 'number'
-      min: 5
-      max: 15
-    should_include_back:
-      label: 'Include back'
-      type: 'boolean'
-    backHeight:
-      label: 'Back height',
-      description: 'The height from the seat to the top of the backrest'
-      type: 'number'
-      min: 5
-      max: 10
+export = Chair
 
-  presets:
-    - id: 'regular-with-back'
-      label: 'Regular With Back'
-      values:
-        backHeight: 10
-        seatDepth: 10
-        seatHeight: 10
-        seatWidth: 10
-        shouldIncludeBack: true
-    - id: 'regular'
-      label: 'Regular (Without Back)'
-      values:
-        backHeight: 10
-        seatDepth: 10
-        seatHeight: 10
-        seatWidth: 10
-        shouldIncludeBack: false
+struct Chair: Assembly
+  prop seat_width: Num
+    label 'Seat width'
+    min 5
+    max 10
+    step 5
 
-  plugins: ['smart-fasteners']
+  prop seat_depth: Num
+    label 'Seat depth'
+    min 5
+    max 15
 
-  parts: (parameters) =>
-    let
-      seat_width:
-      seat_depth:
-      seat_height:
-      back_height:
-      should_include_back:
-        = parameters
+  prop seat_height: Num
+    label 'Seat height'
+    description 'The height from the ground to the top of the seat'
+    min 5
+    max 15
 
-      back_z_beam_end_z = if should_include_back then seat_height + back_height else seat_height
-      seat_panel_start_y = if should_include_back then -1 else 0
-      seat_panel_end_y = if should_include_back then seat_depth - 1 else seat_depth
-    in
-      - GridPanel.XY
-          x: [0, seatWidth]
-          y: [seatPanelStartY, seatPanelEndY]
-          z: seatHeight
+  prop should_include_back: Bool
+    label 'Include back'
 
-      - and
-          shouldIncludeBack
-          GridPanel.XZ
-            x: [0, seatWidth]
-            y: seatDepth - 2
-            z: [seatHeight + 1, seatHeight + 1 + backHeight]
-            fit: 'top'
+  prop back_height: Num
+    label 'Back height',
+    description 'The height from the seat to the top of the backrest'
+    min 5
+    max 10
 
-      - GridBeam.Z
-          x: 0
-          y: 0
-          z: [0, seatHeight]
+  preset regular
+    label 'Regular (Without Back)'
+    values
+      back_height = 10
+      seat_depth = 10
+      seat_height = 10
+      seat_width = 10
+      should_include_back = false
 
-      - GridBeam.Z
-          x: seatWidth - 1
-          y: 0
-          z: [0, seatHeight]
+  preset regular_with_back
+    label 'Regular With Back'
+    values
+      back_height = 10
+      seat_depth = 10
+      seat_height = 10
+      seat_width = 10
+      should_include_back = true
 
-      - GridBeam.Z
-          x: 0
-          y: seatDepth - 1
-          z: [0, backZBeamEndZ]
+  plugins = [SmartFasteners()]
 
-      - GridBeam.Z
-          x: seatWidth - 1
-          y: seatDepth - 1
-          z: [0, backZBeamEndZ]
+  fn parts (self): List<Product> =>
+    let object self =
+      seat_width =
+      seat_depth =
+      seat_height =
+      back_height =
+      should_include_back =
 
-      - GridBeam.X
-          x: [0, seatWidth]
-          y: 1
-          z: seatHeight - 2
+    let back_z_beam_end_z = if should_include_back then seat_height + back_height else seat_height
+    let seat_panel_start_y = if should_include_back then -1 else 0
+    let seat_panel_end_y = if should_include_back then seat_depth - 1 else seat_depth
 
-      - GridBeam.X
-          x: [0, seatWidth]
-          y: seatDepth - 2
-          z: seatHeight - 2
+    list
+      GridPanel.XY
+        x: [0, seat_width]
+        y: [seat_panel_start_y, seat_panel_end_y]
+        z: seatHeight
 
-      - GridBeam.Y
-          x: 1
-          y: [0, seatDepth]
-          z: seatHeight - 1
+      if should_include_back
+        GridPanel.XZ
+          x: [0, seat_width]
+          y: seat_depth - 2
+          z: [seat_height + 1, seat_height + 1 + back_height]
+          fit: 'top'
 
-      - GridBeam.Y
-          x: seatWidth - 2
-          y: [0, seatDepth]
-          z: seatHeight - 1
+      GridBeam.Z
+        x: 0
+        y: 0
+        z: [0, seat_height]
+
+      GridBeam.Z
+        x: seat_width - 1
+        y: 0
+        z: [0, seat_height]
+
+      GridBeam.Z
+        x: 0
+        y: seat_depth - 1
+        z: [0, back_z_beam_end_z]
+
+      GridBeam.Z
+        x: seat_width - 1
+        y: seat_depth - 1
+        z: [0, back_z_beam_end_z]
+
+      GridBeam.X
+        x: [0, seat_width]
+        y: 1
+        z: seat_height - 2
+
+      GridBeam.X
+        x: [0, seat_width]
+        y: seat_depth - 2
+        z: seat_height - 2
+
+      GridBeam.Y
+        x: 1
+        y: [0, seat_depth]
+        z: seat_height - 1
+
+      GridBeam.Y
+        x: seat_width - 2
+        y: [0, seat_depth]
+        z: seat_height - 1
 ```
 
 3d Object base: `3d-object.rimu`
 
 ```
-export trait 3dObject
+export trait Object3d
     (Num)
 
 
@@ -232,20 +233,20 @@ Stock base: `stock.rimu`
 ```
 enum Mesh
   case Cuboid
-    x_length Num
-    y_length Num
-    z_length Num
+    x_length: Num
+    y_length: Num
+    z_length: Num
 
 enum Material
-  case Color (Color)
+  case Color(Color)
 
 struct Renderable
-  prop meshes Map<Mesh>
-  prop materials Map<Material>
-  prop instances List<Instance>
+  prop meshes: Map<Mesh>
+  prop materials: Map<Material>
+  prop instances: List<Instance>
 
 export trait Stock
-  impl 3dObject
+  impl Object3d
 
   fn render (self): Renderable =>
     Self
@@ -263,11 +264,11 @@ export struct GridBeam
     label "Length"
     description "The length of the beam in grid units"
 
-  fn X (x: [Num, Num], y: Num, z: Num) =>
+  fn X (x: [Num, Num], y: Num, z: Num): Self =>
     # ...
-  fn Y (x: [Num, Num], y: Num, z: Num) =>
+  fn Y (x: [Num, Num], y: Num, z: Num): Self =>
     # ...
-  fn X (x: [Num, Num], y: Num, z: Num) =>
+  fn X (x: [Num, Num], y: Num, z: Num): Self =>
     # ...
 ```
 
@@ -288,3 +289,15 @@ export struct GridBeam
     | label "Length"
     | description "The length of the beam in grid units"
 ```
+
+Open questions:
+
+- Should we adopt more of Rhombus?
+  - `def`
+  - `|` alternate
+  - `namespace`
+  - Shubbery notation: https://docs.racket-lang.org/shrubbery/index.html
+- Should we adopt more of Rust?
+  - traits and structs
+  - traits for core functionality
+    - e.g. `Add`, `Sub`, `Mul`, `Div`, etc
