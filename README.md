@@ -96,8 +96,13 @@ let export = Map
   Vector3
   Quaternion
 
-type Vector3: [Num, Num, Num]
-  default = [0, 0, 0]
+
+type Vector3(N: Num): [N, N, N]
+  meta default = [0, 0, 0]
+
+  fn length (self): Num =>
+    let [x, y, z] = self
+    sqrt(x * x, y * y, z * z)
 
 type Quaternion: [Num, Num, Num, Num]
   default = [0, 0, 0, 1]
@@ -113,11 +118,11 @@ let from import("@std/math") = Map
 let export = Object3d
 
 struct Transform
-  translation: Vector3
+  prop translation: Vector3
 
-  rotation: Quaternion
+  prop rotation: Quaternion
 
-  scale: Vector3
+  prop scale: Vector3
     default = [1, 1, 1]
 
   fn translate (self, x: Num, y: Num, z: Num): Self =>
@@ -129,7 +134,7 @@ struct Transform
         self.translation.z + z
 
 trait Object3d
-  transform: Transform
+  prop transform: Transform
 
   fn translate (self, x: Num, y: Num, z: Num): Self =>
     Self
@@ -144,8 +149,9 @@ let Object3d = import("@std/object-3d")
 
 let export = Assembly
 
-type Parts = List(List | Parts)
-  default = []
+type Part = Stock | Assembly
+type Parts = List(Parts | Part | Null)
+  meta default = []
 
 trait Assembly: Object3d
   fn parts: Parts
@@ -162,33 +168,35 @@ let SmartFasteners = import("@villagekit/smart-fasteners@1")
 let export = Chair
 
 struct Chair: Assembly
-  seat_width: Num
+  prop seat_width: Num
     label = 'Seat width'
     min = 5
     max = 10
     step = 5
 
-  seat_depth: Num
+  prop seat_depth: Num
     label = 'Seat depth'
     min = 5
     max = 15
 
-  seat_height: Num
+  prop seat_height: Num
     label = 'Seat height'
     description = 'The height from the ground to the top of the seat'
     min = 5
     max = 15
 
-  should_include_back: Bool
+  prop should_include_back: Bool
     label 'Include back'
 
-  back_height: Num
+  prop back_height: Num
     label = 'Back height'
     description = 'The height from the seat to the top of the backrest'
+    if = fn (self) =>
+      self.should_include_back
     min = 5
     max = 10
 
-  fn regular(): Self
+  fn regular(): Self =>
     meta label = 'Regular (Without Back)'
 
     Self
@@ -198,14 +206,14 @@ struct Chair: Assembly
       seat_width = 10
       should_include_back = false
 
-  fn regular_with_back(): Self
+  fn regular_with_back(): Self =>
     meta label = 'Regular With Back'
 
     Self
       ...Self.regular()
       should_include_back = true
 
-  plugins = [SmartFasteners()]
+  const plugins = [SmartFasteners()]
 
   fn parts (self) =>
     let from self = Map
@@ -289,15 +297,15 @@ enum Material
     color: Color
 
 struct Instance
-  mesh: Str
-  material: Str
-  transform: Transform
-  children: List(Self)
+  prop mesh: Str
+  prop material: Str
+  prop transform: Transform
+  prop children: List(Self)
 
 struct Renderable
-  meshes: Map(Mesh)
-  materials: Map(Material)
-  instances: List(Instance)
+  prop meshes: Map(Mesh)
+  prop materials: Map(Material)
+  prop instances: List(Instance)
 ```
 
 Stock trait: `stock.rimu`
@@ -319,9 +327,9 @@ let Stock = import("@std/stock")
 let export = GridBeam
 
 struct GridBeam: Stock
-  length: Num
-    label "Length"
-    description "The length of the beam in grid units"
+  prop length: Num
+    label = "Length"
+    description = "The length of the beam in grid units"
 
   fn X: Self =>
     meta args = Args
@@ -331,7 +339,7 @@ struct GridBeam: Stock
     # ...
   fn Y (x: Num, y: [Num, Num], z: Num): Self =>
     # ...
-  fn X (x: Num, y: Num, z: [Num, Num]): Self =>
+  fn Z (x: Num, y: Num, z: [Num, Num]): Self =>
     # ...
 ```
 
