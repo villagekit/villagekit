@@ -91,8 +91,8 @@ pub struct RenderableInstance {
     pub mesh: Option<String>,
     #[serde(default)]
     pub material: Option<String>,
-    #[serde(default)]
-    pub transform: Option<Transform>,
+    // #[serde(default)]
+    // pub transform: Option<Transform>,
     #[serde(default)]
     pub children: Option<Vec<RenderableInstance>>,
 }

@@ -1,4 +1,5 @@
 use num_traits::real::Real;
+use villagekit_number::Number;
 
 pub struct Vector3<N: Real> {
     x: N,
@@ -7,7 +8,7 @@ pub struct Vector3<N: Real> {
 }
 
 impl<N: Real> Vector3<N> {
-    fn length(self) -> N {
+    pub fn length(self) -> N {
         let Self { x, y, z } = self;
         (x * x + y * y + z * z).sqrt()
     }

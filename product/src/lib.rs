@@ -1,3 +1,5 @@
+use villagekit_render::Renderable;
+
 pub trait Stock {
     fn render(self) -> Renderable;
 }
