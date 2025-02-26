@@ -1,9 +1,13 @@
+pub mod ops;
+
 use fastnum::{
     dec128,
     decimal::{Context, Decimal, ParseError},
     D128,
 };
 use num_derive::{FromPrimitive, Neg, Num, NumCast, NumOps, One, Real, ToPrimitive, Zero};
+use num_traits::real::Real;
+use ops::Sqrt;
 
 #[derive(
     Debug,
@@ -24,7 +28,17 @@ use num_derive::{FromPrimitive, Neg, Num, NumCast, NumOps, One, Real, ToPrimitiv
     Neg,
     Real,
 )]
-pub struct Number(D128);
+pub struct Number(pub D128);
+
+#[macro_export]
+macro_rules! num {
+    ($($ body:tt)*) => {{
+        match Number::parse(concat!($(stringify!($ body)),*)) {
+            Ok(n) => n,
+            Err(e) => { panic!("{}", e) },
+        }
+    }}
+}
 
 impl Number {
     const CONTEXT: Context = Context::default();
@@ -59,13 +73,21 @@ impl Default for Number {
     }
 }
 
+impl Sqrt for Number {
+    type Output = Number;
+
+    fn sqrt(self) -> Self::Output {
+        <Self as Real>::sqrt(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn it_works() {
-        let expected: Result<Number, ParseError> = Ok(0.2.into());
+        let expected: Result<Number, ParseError> = Ok(num!(0.2));
         let actual = Number::parse("0.2");
         assert_eq!(expected, actual);
     }
