@@ -1,0 +1,6 @@
+[package]
+name = "villagekit-unit"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

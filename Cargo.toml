@@ -3,7 +3,12 @@ resolver = "2"
 members = [
   "demo",
   "engine",
-  "params"
+  "math",
+  "number",
+  "params",
+  "product",
+  "render",
+  "unit"
 ]
 
 [workspace.package]
