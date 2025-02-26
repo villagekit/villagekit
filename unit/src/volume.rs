@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use villagekit_number::Number;
+use villagekit_number::{num, Number};
 
 use crate::{Area, Length};
 
@@ -80,7 +80,7 @@ impl From<CubicMeter> for Volume {
 pub struct CubicFoot(Number);
 impl From<CubicFoot> for Volume {
     fn from(value: CubicFoot) -> Self {
-        Self(value.0 * 0.02831685.into())
+        Self(value.0 * num!(0.02831685))
     }
 }
 

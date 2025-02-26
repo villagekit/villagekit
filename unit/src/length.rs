@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use villagekit_number::Number;
+use villagekit_number::{num, Number};
 
 use crate::{Area, Volume};
 
@@ -80,21 +80,21 @@ impl From<Meter> for Length {
 pub struct Millimeter(pub Number);
 impl From<Millimeter> for Length {
     fn from(value: Millimeter) -> Self {
-        Self(value.0 * 0.001.into())
+        Self(value.0 * num!(0.001))
     }
 }
 
 pub struct Inch(pub Number);
 impl From<Inch> for Length {
     fn from(value: Inch) -> Self {
-        Self(value.0 * 0.0254.into())
+        Self(value.0 * num!(0.0254))
     }
 }
 
 pub struct Foot(pub Number);
 impl From<Foot> for Length {
     fn from(value: Foot) -> Self {
-        Self(value.0 * 0.3048.into())
+        Self(value.0 * num!(0.3048))
     }
 }
 
@@ -105,7 +105,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn convert_from_ft() {
+    fn convert_from_foot() {
         let expected = Length(num!(3.048));
         let actual: Length = Foot(num!(10)).into();
         assert_eq!(expected, actual);

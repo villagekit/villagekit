@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use villagekit_number::Number;
+use villagekit_number::{num, Number};
 
 use crate::{Length, Volume};
 
@@ -80,7 +80,7 @@ impl From<SquareMeter> for Area {
 pub struct SquareFoot(Number);
 impl From<SquareFoot> for Area {
     fn from(value: SquareFoot) -> Self {
-        Self(value.0 * 0.09290304.into())
+        Self(value.0 * num!(0.09290304))
     }
 }
 
@@ -88,12 +88,23 @@ impl From<SquareFoot> for Area {
 mod tests {
     use villagekit_number::num;
 
+    use crate::Foot;
+
     use super::*;
 
     #[test]
     fn convert_from_square_foot() {
         let expected = Area(num!(2.7870912));
         let actual: Area = SquareFoot(num!(30)).into();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn multiply_feet_to_square_feet() {
+        let expected: Area = SquareFoot(num!(25)).into();
+        let height: Length = Foot(num!(5)).into();
+        let width: Length = Foot(num!(5)).into();
+        let actual: Area = height * width;
         assert_eq!(expected, actual);
     }
 }

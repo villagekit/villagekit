@@ -1,9 +1,9 @@
 pub mod ops;
 
 use fastnum::{
-    dec128,
+    dec256,
     decimal::{Context, Decimal, ParseError},
-    D128,
+    D256,
 };
 use num_derive::{FromPrimitive, Neg, Num, NumCast, NumOps, One, Real, ToPrimitive, Zero};
 use num_traits::real::Real;
@@ -28,7 +28,7 @@ use ops::Sqrt;
     Neg,
     Real,
 )]
-pub struct Number(pub D128);
+pub struct Number(pub D256);
 
 #[macro_export]
 macro_rules! num {
@@ -44,13 +44,13 @@ impl Number {
     const CONTEXT: Context = Context::default();
 
     pub fn parse(s: &str) -> Result<Self, ParseError> {
-        let d: D128 = Decimal::from_str(s, Self::CONTEXT)?;
+        let d: D256 = Decimal::from_str(s, Self::CONTEXT)?;
         Ok(Self(d))
     }
 }
 
-impl From<D128> for Number {
-    fn from(value: D128) -> Self {
+impl From<D256> for Number {
+    fn from(value: D256) -> Self {
         Number(value)
     }
 }
@@ -69,7 +69,7 @@ impl From<f64> for Number {
 
 impl Default for Number {
     fn default() -> Self {
-        Number(dec128!(0))
+        num!(0)
     }
 }
 
@@ -89,6 +89,10 @@ mod tests {
     fn it_works() {
         let expected: Result<Number, ParseError> = Ok(num!(0.2));
         let actual = Number::parse("0.2");
+        assert_eq!(expected, actual);
+
+        let expected = num!(1.56);
+        let actual = num!(1.30) * num!(1.20);
         assert_eq!(expected, actual);
     }
 }
