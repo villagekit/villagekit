@@ -3,9 +3,9 @@ use villagekit_unit::Length;
 
 pub trait Stock {
     fn render(&self) -> Renderable;
-    fn product(self) -> Product
+    fn to_product(self) -> Product
     where
-        Self: Sized + 'static,
+        Self: Sized + Send + Sync + 'static,
     {
         Product::new(ProductKind::Stock(Box::new(self)))
     }
@@ -17,13 +17,16 @@ pub trait Assembly {
 
 pub struct Group(pub Vec<Product>);
 
+#[derive(Default)]
 pub enum ProductKind {
-    Stock(Box<dyn Stock>),
-    Assembly(Box<dyn Assembly>),
+    Stock(Box<dyn Stock + Send + Sync>),
+    Assembly(Box<dyn Assembly + Send + Sync>),
     Group(Group),
+    #[default]
     None,
 }
 
+#[derive(Default)]
 pub struct Product {
     pub kind: ProductKind,
     pub transform: Transform,
