@@ -1,32 +1,42 @@
-use villagekit_render::{Object3d, Renderable, Transform};
+use villagekit_render::{Renderable, Transform};
+use villagekit_unit::Length;
 
-pub trait Stock: Object3d {
+pub trait Stock {
     fn render(self) -> Renderable;
 }
 
-pub struct Group {
-    transform: Transform,
-    products: Vec<Product>,
-}
+pub struct Group(Vec<Product>);
 
-impl Object3d for Group {
-    fn transform(self, update: impl Fn(Transform) -> Transform) -> Self {
-        Self {
-            transform: update(self.transform),
-            ..self
-        }
-    }
-}
-
-pub trait Assembly: Object3d {
+pub trait Assembly {
     fn products(self) -> Vec<Product>;
 }
 
-pub enum Product {
-    Stock(Box<dyn Stock>),
+pub enum ProductKind {
     Group(Group),
+    Stock(Box<dyn Stock>),
     Assembly(Box<dyn Assembly>),
     None,
+}
+
+pub struct Product {
+    pub kind: ProductKind,
+    pub transform: Transform,
+}
+
+impl Product {
+    pub fn new(kind: ProductKind) -> Self {
+        Self {
+            kind,
+            transform: Transform::default(),
+        }
+    }
+
+    pub fn translate(self, x: Length, y: Length, z: Length) -> Self {
+        Self {
+            transform: self.transform.translate(x, y, z),
+            ..self
+        }
+    }
 }
 
 #[cfg(test)]

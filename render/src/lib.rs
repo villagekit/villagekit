@@ -1,10 +1,10 @@
-mod object3d;
 mod renderable;
+mod transform;
 
-pub use object3d::{Object3d, Transform};
 pub use renderable::{
     Renderable, RenderableColor, RenderableInstance, RenderableMaterial, RenderableMesh,
 };
+pub use transform::Transform;
 
 #[cfg(test)]
 mod tests {

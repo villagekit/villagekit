@@ -2,6 +2,7 @@ use std::ops::{Add, Mul};
 
 use villagekit_number::{num, ops::Sqrt, Number};
 
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Vector3<N> {
     x: N,
     y: N,
@@ -36,16 +37,7 @@ where
     }
 }
 
-impl<N: Default> Default for Vector3<N> {
-    fn default() -> Self {
-        Self {
-            x: N::default(),
-            y: N::default(),
-            z: N::default(),
-        }
-    }
-}
-
+#[derive(Debug, Copy, Clone)]
 pub struct Quaternion {
     x: Number,
     y: Number,

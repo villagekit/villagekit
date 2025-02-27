@@ -2,6 +2,7 @@ use villagekit_math::{Quaternion, Vector3};
 use villagekit_number::Number;
 use villagekit_unit::Length;
 
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Transform {
     translation: Vector3<Length>,
     rotation: Quaternion,
@@ -21,14 +22,5 @@ impl Transform {
             rotation,
             scale,
         }
-    }
-}
-
-pub trait Object3d {
-    fn get_transform(&self) -> Transform;
-    fn transform(&self, update: impl Fn(Transform) -> Transform) -> Box<Self>;
-
-    fn translate(&self, x: Length, y: Length, z: Length) -> Box<Self> {
-        self.transform(|transform| transform.translate(x, y, z))
     }
 }
