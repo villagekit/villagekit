@@ -1,12 +1,18 @@
+use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Sub};
-
-use villagekit_number::{num, Number};
+use villagekit_number::{num, ops::Sqrt, Number};
 
 use crate::{Area, Length};
 
 // Canonical value is meter^3
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Volume(pub Number);
+
+impl From<Volume> for f32 {
+    fn from(value: Volume) -> Self {
+        value.0.into()
+    }
+}
 
 impl Add for Volume {
     type Output = Volume;
@@ -64,9 +70,17 @@ impl Div<Volume> for Volume {
     }
 }
 
+impl Sqrt for Volume {
+    type Output = Area;
+
+    fn sqrt(self) -> Self::Output {
+        Area(self.0.sqrt())
+    }
+}
+
 impl Default for Volume {
     fn default() -> Self {
-        Self(0.into())
+        Self(num!(0))
     }
 }
 

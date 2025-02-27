@@ -15,6 +15,9 @@ members = [
 version = "0.1.0"
 edition = "2021"
 
+[workspace.dependencies]
+serde = { version = "1.0.217", features = ["derive"] }
+
 ## https://bevyengine.org/learn/quick-start/getting-started/setup/
 
 # Enable a small amount of optimization in the dev profile.

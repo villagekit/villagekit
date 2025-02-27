@@ -6,3 +6,6 @@ edition.workspace = true
 [dependencies]
 villagekit-number = { path = "../number" }
 num-traits = "0.2.19"
+
+[dev-dependencies]
+villagekit-unit = { path = "../unit" }

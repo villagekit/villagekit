@@ -1,13 +1,13 @@
 pub mod ops;
 
 use fastnum::{
-    dec256,
     decimal::{Context, Decimal, ParseError},
     D256,
 };
 use num_derive::{FromPrimitive, Neg, Num, NumCast, NumOps, One, Real, ToPrimitive, Zero};
 use num_traits::real::Real;
 use ops::Sqrt;
+use serde::{Deserialize, Serialize};
 
 #[derive(
     Debug,
@@ -18,6 +18,8 @@ use ops::Sqrt;
     PartialOrd,
     Ord,
     Hash,
+    Serialize,
+    Deserialize,
     Zero,
     One,
     NumOps,
@@ -49,21 +51,9 @@ impl Number {
     }
 }
 
-impl From<D256> for Number {
-    fn from(value: D256) -> Self {
-        Number(value)
-    }
-}
-
-impl From<u64> for Number {
-    fn from(value: u64) -> Self {
-        Number(value.into())
-    }
-}
-
-impl From<f64> for Number {
-    fn from(value: f64) -> Self {
-        Number(value.into())
+impl From<Number> for f32 {
+    fn from(value: Number) -> Self {
+        value.0.into()
     }
 }
 

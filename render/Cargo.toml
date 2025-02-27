@@ -4,7 +4,9 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-ordered-float = { version = "5.0.0", features = ["serde"] }
+villagekit-math = { path = "../math" }
+villagekit-number = { path = "../number" }
+villagekit-unit = { path = "../unit" }
 serde = { version = "1.0.217", features = ["derive"] }
 bevy_render = "0.15.3"
 bevy_math = "0.15.3"

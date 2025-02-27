@@ -7,3 +7,4 @@ edition.workspace = true
 fastnum = { version = "0.1.13", features = ["numtraits", "serde"] }
 num-derive = { git = "https://github.com/ahdinosaur/num-derive" }
 num-traits = "0.2.19"
+serde.workspace = true
