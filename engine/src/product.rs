@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use serde_json::Value;
+use villagekit_product::Product;
 
 #[derive(Component, Default)]
-pub(crate) struct Params(Value);
+struct ProductComponent(Product);

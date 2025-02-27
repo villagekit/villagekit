@@ -1,15 +1,13 @@
 use assets::AssetStore;
 use bevy::prelude::*;
 use bevy_infinite_grid::InfiniteGridPlugin;
+use villagekit_render::{RenderableMaterial, RenderableMesh};
 
 mod assets;
-mod params;
 mod product;
 mod render;
 mod sandbox;
-mod workspace;
 
-pub use crate::product::*;
 pub use crate::render::*;
 
 pub struct EnginePlugin;
