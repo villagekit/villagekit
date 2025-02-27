@@ -24,10 +24,11 @@ impl Transform {
     }
 }
 
-pub trait Object3d: Sized {
-    fn transform(self, update: impl Fn(Transform) -> Transform) -> Self;
+pub trait Object3d {
+    fn get_transform(&self) -> Transform;
+    fn transform(&self, update: impl Fn(Transform) -> Transform) -> Box<Self>;
 
-    fn translate(self, x: Length, y: Length, z: Length) -> Self {
+    fn translate(&self, x: Length, y: Length, z: Length) -> Box<Self> {
         self.transform(|transform| transform.translate(x, y, z))
     }
 }

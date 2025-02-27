@@ -1,25 +1,33 @@
-use villagekit_render::Renderable;
+use villagekit_render::{Object3d, Renderable, Transform};
 
-pub trait Stock {
+pub trait Stock: Object3d {
     fn render(self) -> Renderable;
 }
 
-pub trait Assembly {
-    fn products(self) -> ProductTree;
+pub struct Group {
+    transform: Transform,
+    products: Vec<Product>,
+}
+
+impl Object3d for Group {
+    fn transform(self, update: impl Fn(Transform) -> Transform) -> Self {
+        Self {
+            transform: update(self.transform),
+            ..self
+        }
+    }
+}
+
+pub trait Assembly: Object3d {
+    fn products(self) -> Vec<Product>;
 }
 
 pub enum Product {
     Stock(Box<dyn Stock>),
+    Group(Group),
     Assembly(Box<dyn Assembly>),
-}
-
-pub enum ProductTreeItem {
-    Single(Product),
-    Nested(ProductTree),
     None,
 }
-
-pub struct ProductTree(Vec<ProductTreeItem>);
 
 #[cfg(test)]
 mod tests {
