@@ -7,6 +7,8 @@ use std::collections::BTreeMap;
 use villagekit_number::Number;
 use villagekit_unit::Length;
 
+use crate::Transform;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Renderable {
     pub meshes: BTreeMap<String, RenderableMesh>,
@@ -97,8 +99,8 @@ pub struct RenderableInstance {
     pub mesh: Option<String>,
     #[serde(default)]
     pub material: Option<String>,
-    // #[serde(default)]
-    // pub transform: Option<Transform>,
+    #[serde(default)]
+    pub transform: Option<Transform>,
     #[serde(default)]
     pub children: Option<Vec<RenderableInstance>>,
 }

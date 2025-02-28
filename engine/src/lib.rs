@@ -1,10 +1,9 @@
 use assets::AssetStore;
 use bevy::prelude::*;
 use bevy_infinite_grid::InfiniteGridPlugin;
-use villagekit_render::{RenderableMaterial, RenderableMesh};
+pub use villagekit_render::{Renderable, RenderableInstance, RenderableMaterial, RenderableMesh};
 
 mod assets;
-mod product;
 mod render;
 mod sandbox;
 

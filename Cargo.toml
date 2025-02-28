@@ -17,6 +17,7 @@ edition = "2021"
 
 [workspace.dependencies]
 serde = { version = "1.0.217", features = ["derive"] }
+glam = "0.29.2"
 
 ## https://bevyengine.org/learn/quick-start/getting-started/setup/
 

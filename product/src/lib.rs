@@ -1,3 +1,4 @@
+use bevy_ecs::component::Component;
 use villagekit_render::{Renderable, Transform};
 use villagekit_unit::Length;
 
@@ -15,6 +16,7 @@ pub trait Assembly {
     fn products(&self) -> Vec<Product>;
 }
 
+#[derive(Default)]
 pub struct Group(pub Vec<Product>);
 
 #[derive(Default)]
@@ -26,7 +28,16 @@ pub enum ProductKind {
     None,
 }
 
-#[derive(Default)]
+impl From<Option<ProductKind>> for ProductKind {
+    fn from(value: Option<ProductKind>) -> Self {
+        match value {
+            Some(kind) => kind,
+            None => ProductKind::None,
+        }
+    }
+}
+
+#[derive(Default, Component)]
 pub struct Product {
     pub kind: ProductKind,
     pub transform: Transform,

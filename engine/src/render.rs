@@ -1,4 +1,11 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::HashMap};
+use villagekit_render::{Renderable, RenderableInstance, RenderableMaterial, RenderableMesh};
+
+use crate::{assets::AssetStore, sandbox::Sandbox};
+
+#[derive(Component, Default)]
+#[require(Transform, Visibility)]
+pub struct RenderableObject;
 
 struct SpawnRenderable {
     renderable: Renderable,
@@ -70,7 +77,7 @@ fn spawn_renderable_instance(
     }
 
     if let Some(transform) = instance.transform {
-        entity.insert(transform);
+        entity.insert(Into::<Transform>::into(transform));
     }
 
     if let Some(children) = instance.children {

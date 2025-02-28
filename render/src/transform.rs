@@ -1,8 +1,10 @@
+use bevy_transform::components::Transform as BevyTransform;
+use serde::{Deserialize, Serialize};
 use villagekit_math::{Quaternion, Vector3};
 use villagekit_number::Number;
 use villagekit_unit::Length;
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
 pub struct Transform {
     translation: Vector3<Length>,
     rotation: Quaternion,
@@ -21,6 +23,21 @@ impl Transform {
             translation,
             rotation,
             scale,
+        }
+    }
+}
+
+impl From<Transform> for BevyTransform {
+    fn from(value: Transform) -> Self {
+        let Transform {
+            translation,
+            rotation,
+            scale,
+        } = value;
+        BevyTransform {
+            translation: translation.into(),
+            rotation: rotation.into(),
+            scale: scale.into(),
         }
     }
 }

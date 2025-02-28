@@ -1,8 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul};
-
 use villagekit_number::{num, ops::Sqrt, Number};
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
 pub struct Vector3<N> {
     x: N,
     y: N,
@@ -37,7 +37,17 @@ where
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+impl<N> From<Vector3<N>> for glam::Vec3
+where
+    N: Into<f32>,
+{
+    fn from(value: Vector3<N>) -> Self {
+        let Vector3 { x, y, z } = value;
+        glam::Vec3::new(x.into(), y.into(), z.into())
+    }
+}
+
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Quaternion {
     x: Number,
     y: Number,
@@ -53,6 +63,13 @@ impl Default for Quaternion {
             z: num!(0),
             w: num!(1),
         }
+    }
+}
+
+impl From<Quaternion> for glam::Quat {
+    fn from(value: Quaternion) -> Self {
+        let Quaternion { x, y, z, w } = value;
+        glam::Quat::from_xyzw(x.into(), y.into(), z.into(), w.into())
     }
 }
 

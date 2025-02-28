@@ -16,9 +16,9 @@ fn setup_model(mut commands: Commands) {
             "meshes": {
                 "cube": {
                     "type": "Cuboid",
-                    "x_length": 1,
-                    "y_length": 1,
-                    "z_length": 10
+                    "x_length": "1",
+                    "y_length": "1",
+                    "z_length": "10"
                 }
             },
             "materials": {
@@ -26,10 +26,10 @@ fn setup_model(mut commands: Commands) {
                     "type": "Color",
                     "color": {
                         "type": "Hsla",
-                        "hue": 0,
-                        "saturation": 1,
-                        "lightness": 0.5,
-                        "alpha": 1
+                        "hue": "0",
+                        "saturation": "1",
+                        "lightness": "0.5",
+                        "alpha": "1"
                     }
                 }
             },
@@ -38,9 +38,9 @@ fn setup_model(mut commands: Commands) {
                     "mesh": "cube",
                     "material": "red",
                     "transform": {
-                        "translation": [0, 0, 0],
-                        "rotation": [0, 0, 0, 1],
-                        "scale": [1, 1, 1]
+                        "translation": ["0", "0", "0"],
+                        "rotation": ["0", "0", "0", "1"],
+                        "scale": ["1", "1", "1"]
                     }
                 }
             ]
