@@ -1,4 +1,3 @@
-use bevy_ecs::component::Component;
 use villagekit_render::{Renderable, Transform};
 use villagekit_unit::Length;
 
@@ -37,7 +36,7 @@ impl From<Option<ProductKind>> for ProductKind {
     }
 }
 
-#[derive(Default, Component)]
+#[derive(Default)]
 pub struct Product {
     pub kind: ProductKind,
     pub transform: Transform,

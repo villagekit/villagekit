@@ -6,4 +6,3 @@ edition.workspace = true
 [dependencies]
 villagekit-render = { path = "../render" }
 villagekit-unit = { path = "../unit" }
-bevy_ecs = "0.15.3"
