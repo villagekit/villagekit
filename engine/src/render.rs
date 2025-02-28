@@ -1,14 +1,16 @@
 use bevy::{prelude::*, utils::HashMap};
 use villagekit_render::{Renderable, RenderableInstance, RenderableMaterial, RenderableMesh};
 
-use crate::{assets::AssetStore, sandbox::Sandbox};
+use crate::AssetStore;
 
 #[derive(Component)]
 #[require(Transform, Visibility)]
-pub struct RenderableObject(pub Renderable);
+pub(crate) struct RenderableObject(pub Renderable);
 
-pub fn spawn_renderable(renderable: Renderable, mut commands: Commands) {
-    commands.spawn(RenderableObject(renderable));
+pub fn spawn_renderable(parent: Entity, renderable: Renderable, mut commands: Commands) {
+    commands.entity(parent).with_children(|p| {
+        p.spawn(RenderableObject(renderable));
+    });
 }
 
 pub(crate) fn process_renderables(
@@ -18,11 +20,8 @@ pub(crate) fn process_renderables(
     mut material_assets: ResMut<Assets<StandardMaterial>>,
     mut mesh_store: ResMut<AssetStore<RenderableMesh, Mesh>>,
     mut material_store: ResMut<AssetStore<RenderableMaterial, StandardMaterial>>,
-    mut sandbox_query: Query<Entity, With<Sandbox>>,
 ) {
-    let sandbox_entity = sandbox_query.single_mut();
-
-    for (_entity, object) in query.iter() {
+    for (entity, object) in query.iter() {
         let Renderable {
             meshes,
             materials,
@@ -46,7 +45,7 @@ pub(crate) fn process_renderables(
             materials_by_id.insert(id.clone(), handle);
         }
 
-        commands.entity(sandbox_entity).with_children(|parent| {
+        commands.entity(entity).with_children(|parent| {
             for instance in instances {
                 spawn_renderable_instance(
                     parent,

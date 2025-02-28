@@ -8,7 +8,10 @@ mod product;
 mod render;
 mod sandbox;
 
+pub use crate::assets::*;
+pub use crate::product::*;
 pub use crate::render::*;
+pub use crate::sandbox::*;
 
 pub struct EnginePlugin;
 

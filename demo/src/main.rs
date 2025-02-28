@@ -6,11 +6,11 @@ use villagekit_engine::*;
 fn main() {
     App::new()
         .add_plugins(EnginePlugin)
-        .add_systems(Startup, setup_model)
+        .add_systems(PostStartup, setup_model)
         .run();
 }
 
-fn setup_model(mut commands: Commands) {
+fn setup_model(mut commands: Commands, sandbox: Query<Entity, With<Sandbox>>) {
     let renderable_json = r#"
         {
             "meshes": {
@@ -48,5 +48,5 @@ fn setup_model(mut commands: Commands) {
     let renderable_value = from_str(renderable_json).unwrap();
     let renderable: Renderable = from_value(renderable_value).unwrap();
 
-    spawn_renderable(renderable, commands.reborrow());
+    spawn_renderable(sandbox.single(), renderable, commands.reborrow());
 }
