@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use serde_json::{from_str, from_value};
-use villagekit_engine::*;
+use villagekit_engine::{Transform, *};
 
 fn main() {
     App::new()
@@ -10,43 +10,41 @@ fn main() {
         .run();
 }
 
-fn setup_model(mut commands: Commands, sandbox: Query<Entity, With<Sandbox>>) {
-    let renderable_json = r#"
-        {
-            "meshes": {
-                "cube": {
-                    "type": "Cuboid",
-                    "x_length": "1",
-                    "y_length": "1",
-                    "z_length": "10"
-                }
-            },
-            "materials": {
-                "red": {
-                    "type": "Color",
-                    "color": {
-                        "type": "Hsla",
-                        "hue": "0",
-                        "saturation": "1",
-                        "lightness": "0.5",
-                        "alpha": "1"
-                    }
-                }
-            },
-            "instances": [
-                {
-                    "mesh": "cube",
-                    "material": "red",
-                    "transform": {
-                        "translation": ["0", "0", "0"],
-                        "rotation": ["0", "0", "0", "1"],
-                        "scale": ["1", "1", "1"]
-                    }
-                }
-            ]
-        }"#;
-    let renderable_value = from_str(renderable_json).unwrap();
-    let renderable: Renderable = from_value(renderable_value).unwrap();
+struct Test {}
 
+impl Stock for Test {
+    fn render(&self) -> Renderable {
+        Renderable::default()
+            .insert_mesh(
+                "cube".into(),
+                RenderableMesh::Cuboid {
+                    x_length: Meter(num!(1)).into(),
+                    y_length: Meter(num!(1)).into(),
+                    z_length: Meter(num!(10)).into(),
+                },
+            )
+            .insert_material(
+                "red".into(),
+                RenderableMaterial::Color {
+                    color: RenderableColor::Hsla {
+                        hue: num!(0),
+                        saturation: num!(1),
+                        lightness: num!(0.5),
+                        alpha: num!(1),
+                    },
+                },
+            )
+            .insert_instance(RenderableInstance {
+                mesh: Some("cube".into()),
+                material: Some("red".into()),
+                transform: Some(Transform::default()),
+                children: Some(vec![]),
+            })
+    }
+}
+
+fn setup_model(mut commands: Commands, sandbox: Query<Entity, With<Sandbox>>) {
+    let test = Test {};
+    let renderable = test.render();
     spawn_renderable(sandbox.single(), renderable, commands.reborrow());
 }

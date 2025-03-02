@@ -9,11 +9,27 @@ use villagekit_unit::Length;
 
 use crate::Transform;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Renderable {
     pub meshes: BTreeMap<String, RenderableMesh>,
     pub materials: BTreeMap<String, RenderableMaterial>,
     pub instances: Vec<RenderableInstance>,
+}
+
+impl Renderable {
+    pub fn insert_mesh(mut self, key: String, mesh: RenderableMesh) -> Self {
+        self.meshes.insert(key, mesh);
+        self
+    }
+    pub fn insert_material(mut self, key: String, material: RenderableMaterial) -> Self {
+        self.materials.insert(key, material);
+        self
+    }
+    pub fn insert_instance(mut self, instance: RenderableInstance) -> Self {
+        // TODO check that meshes and materials exist, for children too.
+        self.instances.push(instance);
+        self
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
