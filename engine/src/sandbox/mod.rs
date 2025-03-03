@@ -4,7 +4,7 @@ use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridSettings};
 
 #[derive(Component, Default)]
 #[require(Transform, Visibility)]
-pub(crate) struct Sandbox;
+pub struct Sandbox;
 
 pub(crate) fn setup_sandbox(
     mut commands: Commands,

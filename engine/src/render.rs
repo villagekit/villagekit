@@ -1,154 +1,65 @@
 use bevy::{prelude::*, utils::HashMap};
-use ordered_float::OrderedFloat;
-use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use villagekit_render::{Renderable, RenderableInstance, RenderableMaterial, RenderableMesh};
 
-use crate::{assets::AssetStore, sandbox::Sandbox};
+use crate::AssetStore;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Renderable {
-    pub meshes: BTreeMap<String, RenderableMesh>,
-    pub materials: BTreeMap<String, RenderableMaterial>,
-    pub instances: Vec<RenderableInstance>,
-}
-
-#[derive(Component, Default)]
+#[derive(Component)]
 #[require(Transform, Visibility)]
-pub struct RenderableObject;
+pub(crate) struct RenderableObject(pub Renderable);
 
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-#[serde(tag = "type")]
-pub enum RenderableMesh {
-    Cuboid {
-        x_length: OrderedFloat<f32>,
-        y_length: OrderedFloat<f32>,
-        z_length: OrderedFloat<f32>,
-    },
+pub fn spawn_renderable(parent: Entity, renderable: Renderable, commands: &mut Commands) {
+    commands.entity(parent).with_children(|p| {
+        p.spawn(RenderableObject(renderable));
+    });
 }
 
-impl From<RenderableMesh> for Mesh {
-    fn from(value: RenderableMesh) -> Self {
-        value.mesh()
-    }
-}
+pub(crate) fn process_renderables(
+    mut commands: Commands,
+    query: Query<(Entity, &RenderableObject), Added<RenderableObject>>,
+    mut mesh_assets: ResMut<Assets<Mesh>>,
+    mut material_assets: ResMut<Assets<StandardMaterial>>,
+    mut mesh_store: ResMut<AssetStore<RenderableMesh, Mesh>>,
+    mut material_store: ResMut<AssetStore<RenderableMaterial, StandardMaterial>>,
+) {
+    for (entity, object) in query.iter() {
+        let Renderable {
+            meshes,
+            materials,
+            instances,
+        } = &object.0;
 
-impl RenderableMesh {
-    fn mesh(&self) -> Mesh {
-        match self {
-            &RenderableMesh::Cuboid {
-                x_length,
-                y_length,
-                z_length,
-            } => Cuboid::new(*x_length, *y_length, *z_length).into(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-#[serde(tag = "type")]
-pub enum RenderableColor {
-    Hsla {
-        hue: OrderedFloat<f32>,
-        saturation: OrderedFloat<f32>,
-        lightness: OrderedFloat<f32>,
-        alpha: OrderedFloat<f32>,
-    },
-}
-
-impl From<RenderableColor> for Color {
-    fn from(value: RenderableColor) -> Self {
-        match value {
-            RenderableColor::Hsla {
-                hue,
-                saturation,
-                lightness,
-                alpha,
-            } => Color::hsla(*hue, *saturation, *lightness, *alpha),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-#[serde(tag = "type")]
-pub enum RenderableMaterial {
-    Color { color: RenderableColor },
-}
-
-impl RenderableMaterial {
-    fn material(&self) -> StandardMaterial {
-        match self {
-            RenderableMaterial::Color { color } => StandardMaterial::from_color(color.clone()),
-        }
-    }
-}
-
-impl From<RenderableMaterial> for StandardMaterial {
-    fn from(value: RenderableMaterial) -> Self {
-        value.material()
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RenderableInstance {
-    #[serde(default)]
-    pub mesh: Option<String>,
-    #[serde(default)]
-    pub material: Option<String>,
-    #[serde(default)]
-    pub transform: Option<Transform>,
-    #[serde(default)]
-    pub children: Option<Vec<RenderableInstance>>,
-}
-
-struct SpawnRenderable {
-    renderable: Renderable,
-}
-
-impl Command for SpawnRenderable {
-    fn apply(self, world: &mut World) {
         let mut meshes_by_id: HashMap<String, Handle<Mesh>> = HashMap::new();
         let mut materials_by_id: HashMap<String, Handle<StandardMaterial>> = HashMap::new();
 
-        world.resource_scope(|world, mut assets: Mut<Assets<Mesh>>| {
-            world.resource_scope(|_world, mut store: Mut<AssetStore<RenderableMesh, Mesh>>| {
-                for (id, mesh) in self.renderable.meshes {
-                    let handle = store.insert(mesh.clone(), mesh.into(), &mut assets);
-                    meshes_by_id.insert(id, handle);
-                }
-            });
-        });
-        world.resource_scope(|world, mut assets: Mut<Assets<StandardMaterial>>| {
-            world.resource_scope(
-                |_world, mut store: Mut<AssetStore<RenderableMaterial, StandardMaterial>>| {
-                    for (id, material) in self.renderable.materials {
-                        let handle = store.insert(material.clone(), material.into(), &mut assets);
-                        materials_by_id.insert(id, handle);
-                    }
-                },
+        for (id, mesh) in meshes {
+            let handle = mesh_store.insert(mesh.clone(), mesh.clone().into(), &mut mesh_assets);
+            meshes_by_id.insert(id.clone(), handle);
+        }
+
+        for (id, material) in materials {
+            let handle = material_store.insert(
+                material.clone(),
+                material.clone().into(),
+                &mut material_assets,
             );
-        });
+            materials_by_id.insert(id.clone(), handle);
+        }
 
-        let sandbox = world
-            .query_filtered::<Entity, With<Sandbox>>()
-            .get_single(world)
-            .expect("Unable to get sandbox entity");
-
-        world.entity_mut(sandbox).with_children(|parent| {
-            parent.spawn(RenderableObject).with_children(|parent| {
-                for instance in self.renderable.instances {
-                    spawn_renderable_instance(parent, instance, &meshes_by_id, &materials_by_id);
-                }
-            });
+        commands.entity(entity).with_children(|parent| {
+            for instance in instances {
+                spawn_renderable_instance(
+                    parent,
+                    instance.clone(),
+                    &meshes_by_id,
+                    &materials_by_id,
+                );
+            }
         });
     }
 }
 
-pub fn spawn_renderable(renderable: Renderable, mut commands: Commands) {
-    commands.queue(SpawnRenderable { renderable });
-}
-
 fn spawn_renderable_instance(
-    parent: &mut WorldChildBuilder,
+    parent: &mut ChildBuilder,
     instance: RenderableInstance,
     meshes_by_id: &HashMap<String, Handle<Mesh>>,
     materials_by_id: &HashMap<String, Handle<StandardMaterial>>,
@@ -170,7 +81,7 @@ fn spawn_renderable_instance(
     }
 
     if let Some(transform) = instance.transform {
-        entity.insert(transform);
+        entity.insert(Into::<Transform>::into(transform));
     }
 
     if let Some(children) = instance.children {

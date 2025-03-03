@@ -1,0 +1,13 @@
+[package]
+name = "villagekit-math"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+villagekit-number = { path = "../number" }
+num-traits = "0.2.19"
+glam.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+villagekit-unit = { path = "../unit" }

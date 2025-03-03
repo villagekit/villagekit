@@ -1,52 +1,68 @@
 use bevy::prelude::*;
 
-use serde_json::{from_str, from_value};
-use villagekit_engine::*;
+use villagekit_engine::{Transform, *};
 
 fn main() {
     App::new()
         .add_plugins(EnginePlugin)
-        .add_systems(Startup, setup_model)
+        .add_systems(PostStartup, setup_model)
         .run();
 }
 
-fn setup_model(mut commands: Commands) {
-    let renderable_json = r#"
-        {
-            "meshes": {
-                "cube": {
-                    "type": "Cuboid",
-                    "x_length": 1,
-                    "y_length": 1,
-                    "z_length": 10
-                }
-            },
-            "materials": {
-                "red": {
-                    "type": "Color",
-                    "color": {
-                        "type": "Hsla",
-                        "hue": 0,
-                        "saturation": 1,
-                        "lightness": 0.5,
-                        "alpha": 1
-                    }
-                }
-            },
-            "instances": [
-                {
-                    "mesh": "cube",
-                    "material": "red",
-                    "transform": {
-                        "translation": [0, 0, 0],
-                        "rotation": [0, 0, 0, 1],
-                        "scale": [1, 1, 1]
-                    }
-                }
-            ]
-        }"#;
-    let renderable_value = from_str(renderable_json).unwrap();
-    let renderable: Renderable = from_value(renderable_value).unwrap();
+#[derive(Clone)]
+struct BundleOfSticks {}
 
-    spawn_renderable(renderable, commands.reborrow());
+impl Assembly for BundleOfSticks {
+    fn products(&self) -> Vec<Product> {
+        vec![
+            (Stick {})
+                .place()
+                .translate(Length(num!(0)), Length(num!(0)), Length(num!(0))),
+            (Stick {})
+                .place()
+                .translate(Length(num!(2)), Length(num!(2)), Length(num!(0))),
+            (Stick {})
+                .place()
+                .translate(Length(num!(5)), Length(num!(5)), Length(num!(0))),
+        ]
+    }
+}
+
+#[derive(Clone)]
+struct Stick {}
+
+impl Stock for Stick {
+    fn render(&self) -> Renderable {
+        Renderable::default()
+            .insert_mesh(
+                "cube".into(),
+                RenderableMesh::Cuboid {
+                    x_length: Meter(num!(1)).into(),
+                    y_length: Meter(num!(1)).into(),
+                    z_length: Meter(num!(10)).into(),
+                },
+            )
+            .insert_material(
+                "red".into(),
+                RenderableMaterial::Color {
+                    color: RenderableColor::Hsla {
+                        hue: num!(0),
+                        saturation: num!(1),
+                        lightness: num!(0.5),
+                        alpha: num!(1),
+                    },
+                },
+            )
+            .insert_instance(RenderableInstance {
+                mesh: Some("cube".into()),
+                material: Some("red".into()),
+                transform: Some(Transform::default()),
+                children: Some(vec![]),
+            })
+    }
+}
+
+fn setup_model(mut commands: Commands, sandbox: Query<Entity, With<Sandbox>>) {
+    let test = BundleOfSticks {};
+    spawn_product(sandbox.single(), test.place(), &mut commands);
 }
