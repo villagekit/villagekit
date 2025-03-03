@@ -6,9 +6,7 @@ use crate::quaternion::Quaternion;
 use crate::vector3::Vector3;
 use villagekit_number::{num, ops::Sqrt, Number};
 
-/// A 3×3 matrix represented by three basis vectors (columns):
-///   [ x_axis  y_axis  z_axis ]
-/// Each axis is a Vector3<Number>.
+/// A 3×3 matrix represented by three basis vectors (columns).
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Matrix3 {
     pub x_axis: Vector3<Number>,
@@ -17,8 +15,11 @@ pub struct Matrix3 {
 }
 
 impl Matrix3 {
-    /// Create a new Matrix3 from its three column vectors.
-    pub fn new(x_axis: Vector3<Number>, y_axis: Vector3<Number>, z_axis: Vector3<Number>) -> Self {
+    pub fn from_cols(
+        x_axis: Vector3<Number>,
+        y_axis: Vector3<Number>,
+        z_axis: Vector3<Number>,
+    ) -> Self {
         Self {
             x_axis,
             y_axis,
@@ -26,8 +27,16 @@ impl Matrix3 {
         }
     }
 
+    pub fn from_rows(row1: Vector3<Number>, row2: Vector3<Number>, row3: Vector3<Number>) -> Self {
+        Self {
+            x_axis: Vector3::new(row1.x, row2.x, row3.x),
+            y_axis: Vector3::new(row1.y, row2.y, row3.y),
+            z_axis: Vector3::new(row1.z, row2.z, row3.z),
+        }
+    }
+
     pub fn identity() -> Self {
-        Self::new(
+        Self::from_rows(
             Vector3::new(num!(1), num!(0), num!(0)),
             Vector3::new(num!(0), num!(1), num!(0)),
             Vector3::new(num!(0), num!(0), num!(1)),
@@ -114,10 +123,12 @@ impl Matrix3 {
     pub fn determinant(&self) -> Number {
         // Using the standard formula:
         // det = x_axis·(y_axis × z_axis)
-        let cross_x = self.y_axis.y * self.z_axis.z - self.z_axis.y * self.y_axis.z;
-        let cross_y = self.y_axis.z * self.z_axis.x - self.z_axis.z * self.y_axis.x;
-        let cross_z = self.y_axis.x * self.z_axis.y - self.z_axis.x * self.y_axis.y;
-        self.x_axis.x * cross_x + self.x_axis.y * cross_y + self.x_axis.z * cross_z
+        let Self {
+            x_axis,
+            y_axis,
+            z_axis,
+        } = self;
+        x_axis.dot(&y_axis.cross(z_axis))
     }
 }
 
@@ -208,7 +219,7 @@ mod tests {
     #[test]
     fn determinant_of_singular_matrix() {
         let expected = num!(0);
-        let matrix = Matrix3::new(
+        let matrix = Matrix3::from_rows(
             Vector3::new(num!(1), num!(2), num!(3)),
             Vector3::new(num!(4), num!(5), num!(6)),
             Vector3::new(num!(7), num!(8), num!(9)),
@@ -220,7 +231,7 @@ mod tests {
     #[test]
     fn determinant_of_lower_triagular_matrix() {
         let expected = num!(7) * num!(2) * num!(5);
-        let matrix = Matrix3::new(
+        let matrix = Matrix3::from_rows(
             Vector3::new(num!(7), num!(0), num!(0)),
             Vector3::new(num!(1), num!(2), num!(0)),
             Vector3::new(num!(3), num!(4), num!(5)),
@@ -232,7 +243,7 @@ mod tests {
     #[test]
     fn determinant_of_upper_triangular_matrix() {
         let expected = num!(5) * num!(3) * num!(6);
-        let matrix = Matrix3::new(
+        let matrix = Matrix3::from_rows(
             Vector3::new(num!(5), num!(2), num!(-1)),
             Vector3::new(num!(0), num!(3), num!(4)),
             Vector3::new(num!(0), num!(0), num!(6)),
@@ -244,7 +255,7 @@ mod tests {
     #[test]
     fn determinant_of_random_positive_matrix() {
         let expected = num!(-33);
-        let matrix = Matrix3::new(
+        let matrix = Matrix3::from_rows(
             Vector3::new(num!(3), num!(1), num!(4)),
             Vector3::new(num!(2), num!(0), num!(5)),
             Vector3::new(num!(7), num!(8), num!(6)),
@@ -256,7 +267,7 @@ mod tests {
     #[test]
     fn determinant_of_random_negative_matrix() {
         let expected = num!(139);
-        let matrix = Matrix3::new(
+        let matrix = Matrix3::from_rows(
             Vector3::new(num!(-3), num!(1), num!(2)),
             Vector3::new(num!(0), num!(-4), num!(5)),
             Vector3::new(num!(7), num!(8), num!(-6)),

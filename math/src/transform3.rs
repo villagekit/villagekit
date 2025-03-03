@@ -89,7 +89,7 @@ impl Transform3 {
         let rot_z = self.linear.z_axis * inv_sz;
 
         // Step 5: build a pure rotation matrix from that, then convert to Quaternion
-        let rot_matrix = Matrix3::new(rot_x, rot_y, rot_z);
+        let rot_matrix = Matrix3::from_cols(rot_x, rot_y, rot_z);
         let quaternion: Quaternion = rot_matrix.into();
 
         let scale = Vector3::new(sx, sy, sz);

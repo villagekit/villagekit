@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul, Sub};
 use villagekit_number::{ops::Sqrt, Number};
 
-#[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize)]
 pub struct Vector3<N> {
     pub x: N,
     pub y: N,
@@ -50,12 +50,36 @@ where
 
 impl<N> Vector3<N>
 where
-    N: Copy + Add<N, Output = N> + Mul<N>,
+    N: Copy + Add<Output = N> + Mul,
     <N as Mul>::Output: Add<Output = <N as Mul>::Output> + Sqrt<Output = N>,
 {
     pub fn magnitude(self) -> N {
         let Self { x, y, z } = self;
         (x * x + y * y + z * z).sqrt()
+    }
+}
+
+impl<N> Vector3<N>
+where
+    N: Copy + Mul,
+    <N as Mul>::Output: Add<Output = <N as Mul>::Output>,
+{
+    pub fn dot(&self, other: &Self) -> <N as Mul>::Output {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
+}
+
+impl<N> Vector3<N>
+where
+    N: Copy + Mul,
+    <N as Mul>::Output: Sub<Output = <N as Mul>::Output>,
+{
+    pub fn cross(&self, other: &Self) -> Vector3<<N as Mul>::Output> {
+        Vector3::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
     }
 }
 
@@ -66,5 +90,30 @@ where
     fn from(value: Vector3<N>) -> Self {
         let Vector3 { x, y, z } = value;
         glam::Vec3::new(x.into(), y.into(), z.into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dot_product() {
+        let a = Vector3::new(1, 2, 3);
+        let b = Vector3::new(4, 5, 6);
+        // 1*4 + 2*5 + 3*6 = 4 + 10 + 18 = 32
+        assert_eq!(a.dot(&b), 32);
+    }
+
+    #[test]
+    fn cross_product() {
+        let a = Vector3::new(1, 2, 3);
+        let b = Vector3::new(4, 5, 6);
+        // The cross product should be:
+        // x = 2*6 - 3*5 = 12 - 15 = -3,
+        // y = 3*4 - 1*6 = 12 - 6 = 6,
+        // z = 1*5 - 2*4 = 5 - 8 = -3.
+        let cross = a.cross(&b);
+        assert_eq!(cross, Vector3::new(-3, 6, -3));
     }
 }
