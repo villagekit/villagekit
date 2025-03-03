@@ -31,7 +31,8 @@ impl Plugin for EnginePlugin {
         ))
         .insert_resource(AssetStore::<RenderableMesh, Mesh>::new())
         .insert_resource(AssetStore::<RenderableMaterial, StandardMaterial>::new())
-        .add_systems(Startup, crate::sandbox::setup_sandbox)
-        .add_systems(Update, crate::render::process_renderables);
+        .add_systems(Startup, setup_sandbox)
+        .add_systems(Update, process_products)
+        .add_systems(Update, process_renderables);
     }
 }

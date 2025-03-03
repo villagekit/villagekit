@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-use serde_json::{from_str, from_value};
 use villagekit_engine::{Transform, *};
 
 fn main() {
@@ -10,6 +9,7 @@ fn main() {
         .run();
 }
 
+#[derive(Clone)]
 struct Test {}
 
 impl Stock for Test {
@@ -45,6 +45,5 @@ impl Stock for Test {
 
 fn setup_model(mut commands: Commands, sandbox: Query<Entity, With<Sandbox>>) {
     let test = Test {};
-    let renderable = test.render();
-    spawn_renderable(sandbox.single(), renderable, commands.reborrow());
+    spawn_product(sandbox.single(), test.to_product(), &mut commands);
 }

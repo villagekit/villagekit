@@ -1,7 +1,8 @@
+use dyn_clone::DynClone;
 use villagekit_render::{Renderable, Transform};
 use villagekit_unit::Length;
 
-pub trait Stock {
+pub trait Stock: DynClone {
     fn render(&self) -> Renderable;
     fn to_product(self) -> Product
     where
@@ -11,14 +12,17 @@ pub trait Stock {
     }
 }
 
-pub trait Assembly {
+pub trait Assembly: DynClone {
     fn products(&self) -> Vec<Product>;
 }
 
-#[derive(Default)]
+dyn_clone::clone_trait_object!(Stock);
+dyn_clone::clone_trait_object!(Assembly);
+
+#[derive(Default, Clone)]
 pub struct Group(pub Vec<Product>);
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub enum ProductKind {
     Stock(Box<dyn Stock + Send + Sync>),
     Assembly(Box<dyn Assembly + Send + Sync>),
@@ -36,7 +40,7 @@ impl From<Option<ProductKind>> for ProductKind {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Product {
     pub kind: ProductKind,
     pub transform: Transform,

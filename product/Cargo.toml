@@ -6,3 +6,4 @@ edition.workspace = true
 [dependencies]
 villagekit-render = { path = "../render" }
 villagekit-unit = { path = "../unit" }
+dyn-clone.workspace = true

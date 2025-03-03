@@ -7,7 +7,7 @@ use crate::AssetStore;
 #[require(Transform, Visibility)]
 pub(crate) struct RenderableObject(pub Renderable);
 
-pub fn spawn_renderable(parent: Entity, renderable: Renderable, mut commands: Commands) {
+pub fn spawn_renderable(parent: Entity, renderable: Renderable, commands: &mut Commands) {
     commands.entity(parent).with_children(|p| {
         p.spawn(RenderableObject(renderable));
     });
