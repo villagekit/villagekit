@@ -37,6 +37,14 @@ impl Default for Transform {
     }
 }
 
+impl From<Matrix4> for Transform {
+    fn from(value: Matrix4) -> Self {}
+}
+
+impl From<Transform> for Matrix {
+    fn from(value: Transform) -> Self {}
+}
+
 impl From<Transform> for BevyTransform {
     fn from(value: Transform) -> Self {
         let Transform {

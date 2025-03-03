@@ -5,7 +5,7 @@ use fastnum::{
     D256,
 };
 use num_derive::{FromPrimitive, Neg, Num, NumCast, NumOps, One, Real, ToPrimitive, Zero};
-use num_traits::real::Real;
+pub use num_traits::real::Real;
 use ops::Sqrt;
 use serde::{Deserialize, Serialize};
 

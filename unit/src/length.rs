@@ -8,12 +8,6 @@ use crate::{Area, Volume};
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Length(pub Number);
 
-impl From<Length> for f32 {
-    fn from(value: Length) -> Self {
-        value.0.into()
-    }
-}
-
 impl Add for Length {
     type Output = Length;
 
@@ -35,6 +29,14 @@ impl Mul<Number> for Length {
 
     fn mul(self, rhs: Number) -> Self::Output {
         Self(self.0 * rhs)
+    }
+}
+
+impl Mul<Length> for Number {
+    type Output = Length;
+
+    fn mul(self, rhs: Length) -> Self::Output {
+        Length(self * rhs.0)
     }
 }
 
@@ -81,6 +83,12 @@ impl Sqrt for Length {
 impl Default for Length {
     fn default() -> Self {
         Self(num!(0))
+    }
+}
+
+impl From<Length> for f32 {
+    fn from(value: Length) -> Self {
+        value.0.into()
     }
 }
 
