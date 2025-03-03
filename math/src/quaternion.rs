@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::ops;
 use villagekit_number::{num, Number, Real};
 
 use crate::vector3::Vector3;
@@ -34,6 +35,10 @@ impl Quaternion {
         let z = a.z * b.w + a.w * b.z + a.x * b.y - a.y * b.x;
         let w = a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z;
         Self { x, y, z, w }
+    }
+    pub fn multipy_scalar(self, n: Number) -> Self {
+        let Self { x, y, z, w } = self;
+        Quaternion::new(x * n, y * n, z * n, w * n)
     }
 }
 

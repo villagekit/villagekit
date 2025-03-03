@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul, Sub};
 use villagekit_number::{ops::Sqrt, Number};
 
+use crate::Matrix3;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize)]
 pub struct Vector3<N> {
     pub x: N,
@@ -59,12 +61,13 @@ where
     }
 }
 
-impl<N> Vector3<N>
-where
-    N: Copy + Mul,
-    <N as Mul>::Output: Add<Output = <N as Mul>::Output>,
-{
-    pub fn dot(&self, other: &Self) -> <N as Mul>::Output {
+impl<A> Vector3<A> {
+    pub fn dot<B>(&self, other: &Vector3<B>) -> <A as Mul<B>>::Output
+    where
+        B: Copy,
+        A: Copy + Mul<B>,
+        <A as Mul<B>>::Output: Add<Output = <A as Mul<B>>::Output>,
+    {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 }
@@ -80,6 +83,18 @@ where
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
         )
+    }
+}
+
+impl<N> Vector3<N>
+where
+    N: Copy + Mul<Number, Output = N> + Add<N, Output = N>,
+{
+    pub fn apply_matrix3(&self, m: &Matrix3) -> Vector3<N> {
+        let x = self.dot(&m.x_axis);
+        let y = self.dot(&m.y_axis);
+        let z = self.dot(&m.z_axis);
+        Vector3 { x, y, z }
     }
 }
 

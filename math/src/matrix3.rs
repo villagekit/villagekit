@@ -43,12 +43,9 @@ impl Matrix3 {
         )
     }
 
-    /// Creates a rotation matrix from a given Quaternion.
-    ///
-    /// Standard conversion from quaternion (x, y, z, w) to a 3×3 matrix.
+    /// Creates a rotation matrix from a given unit Quaternion.
     pub fn from_quaternion(q: Quaternion) -> Self {
-        // Normalize if desired (depends on whether your Quaternions are guaranteed normalized).
-        // This sample does not explicitly normalize `q`.
+        // TODO Update to use the non-unit formula: https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
 
         let one = num!(1);
         let two = num!(2);
@@ -63,7 +60,7 @@ impl Matrix3 {
         let wy = q.w * q.y;
         let wz = q.w * q.z;
 
-        // According to the standard formula:
+        // According to the standard formula ( https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion ):
         //
         //   | 1 - 2yy - 2zz, 2xy - 2wz,     2xz + 2wy     |
         //   | 2xy + 2wz,     1 - 2xx - 2zz, 2yz - 2wx     |
@@ -103,26 +100,8 @@ impl Matrix3 {
         }
     }
 
-    /// Transforms a vector. Used for directions, normals, etc.
-    pub fn transform<N>(&self, v: Vector3<N>) -> Vector3<N>
-    where
-        Number: Mul<N, Output = N>,
-        N: Copy + Add<N, Output = N>,
-    {
-        // result.x = dot(self.x_axis, v)
-        // result.y = dot(self.y_axis, v)
-        // result.z = dot(self.z_axis, v)
-        Vector3 {
-            x: self.x_axis.x * v.x + self.y_axis.x * v.y + self.z_axis.x * v.z,
-            y: self.x_axis.y * v.x + self.y_axis.y * v.y + self.z_axis.y * v.z,
-            z: self.x_axis.z * v.x + self.y_axis.z * v.y + self.z_axis.z * v.z,
-        }
-    }
-
     /// Compute the determinant of a Matrix3.
     pub fn determinant(&self) -> Number {
-        // Using the standard formula:
-        // det = x_axis·(y_axis × z_axis)
         let Self {
             x_axis,
             y_axis,
@@ -136,9 +115,9 @@ impl Mul<Matrix3> for Matrix3 {
     type Output = Matrix3;
 
     fn mul(self, rhs: Matrix3) -> Self::Output {
-        let c0 = self.transform(Vector3::new(rhs.x_axis.x, rhs.x_axis.y, rhs.x_axis.z));
-        let c1 = self.transform(Vector3::new(rhs.y_axis.x, rhs.y_axis.y, rhs.y_axis.z));
-        let c2 = self.transform(Vector3::new(rhs.z_axis.x, rhs.z_axis.y, rhs.z_axis.z));
+        let c0 = Vector3::new(rhs.x_axis.x, rhs.x_axis.y, rhs.x_axis.z).apply_matrix3(&self);
+        let c1 = Vector3::new(rhs.y_axis.x, rhs.y_axis.y, rhs.y_axis.z).apply_matrix3(&self);
+        let c2 = Vector3::new(rhs.z_axis.x, rhs.z_axis.y, rhs.z_axis.z).apply_matrix3(&self);
         Self {
             x_axis: c0,
             y_axis: c1,
@@ -153,52 +132,53 @@ impl Default for Matrix3 {
     }
 }
 
+// https://math.stackexchange.com/questions/893984/conversion-of-rotation-matrix-to-quaternion/3183435#3183435
 impl From<Matrix3> for Quaternion {
     fn from(m: Matrix3) -> Self {
-        let trace = m.x_axis.x + m.y_axis.y + m.z_axis.z;
-        let half = num!(0.5);
+        let one = num!(1);
 
-        if trace > num!(0) {
-            // S = sqrt(trace + 1) * 2; we factor out /2 in a single step
-            let s = (trace + num!(1)).sqrt() * half;
-            let w = s;
-            let inv_s = half / s;
-            let x = (m.y_axis.z - m.z_axis.y) * inv_s;
-            let y = (m.z_axis.x - m.x_axis.z) * inv_s;
-            let z = (m.x_axis.y - m.y_axis.x) * inv_s;
-            Quaternion::new(x, y, z, w)
-        } else {
-            // If trace <= 0, pick the largest diagonal element to avoid numerical instability
-            let (xx, yy, zz) = (m.x_axis.x, m.y_axis.y, m.z_axis.z);
-            let max_axis = xx.max(yy.max(zz));
+        // First, unpack the columns of Matrix3 into the usual
+        // row/column notation mXY, where X is row and Y is column.
+        //
+        // Because x_axis is the first column, we map:
+        //   m00 = x_axis.x, m10 = x_axis.y, m20 = x_axis.z
+        //   m01 = y_axis.x, m11 = y_axis.y, m21 = y_axis.z
+        //   m02 = z_axis.x, m12 = z_axis.y, m22 = z_axis.z
 
-            if max_axis == xx {
-                let s = (xx - yy - zz + num!(1)).sqrt() * half;
-                let x = s;
-                let inv_s = half / s;
-                let y = (m.x_axis.y + m.y_axis.x) * inv_s;
-                let z = (m.z_axis.x + m.x_axis.z) * inv_s;
-                let w = (m.y_axis.z - m.z_axis.y) * inv_s;
-                Quaternion::new(x, y, z, w)
-            } else if max_axis == yy {
-                let s = (-xx + yy - zz + num!(1)).sqrt() * half;
-                let y = s;
-                let inv_s = half / s;
-                let x = (m.x_axis.y + m.y_axis.x) * inv_s;
-                let z = (m.y_axis.z + m.z_axis.y) * inv_s;
-                let w = (m.z_axis.x - m.x_axis.z) * inv_s;
-                Quaternion::new(x, y, z, w)
+        let m00 = m.x_axis.x;
+        let m10 = m.x_axis.y;
+        let m20 = m.x_axis.z;
+
+        let m01 = m.y_axis.x;
+        let m11 = m.y_axis.y;
+        let m21 = m.y_axis.z;
+
+        let m02 = m.z_axis.x;
+        let m12 = m.z_axis.y;
+        let m22 = m.z_axis.z;
+
+        let (t, q);
+
+        #[allow(clippy::collapsible_else_if)]
+        if m22 < num!(0) {
+            if m00 > m11 {
+                t = one + m00 - m11 - m22;
+                q = Quaternion::new(t, m01 + m10, m20 + m02, m12 - m21);
             } else {
-                // zz is largest
-                let s = (-xx - yy + zz + num!(1)).sqrt() * half;
-                let z = s;
-                let inv_s = half / s;
-                let x = (m.z_axis.x + m.x_axis.z) * inv_s;
-                let y = (m.y_axis.z + m.z_axis.y) * inv_s;
-                let w = (m.x_axis.y - m.y_axis.x) * inv_s;
-                Quaternion::new(x, y, z, w)
+                t = one - m00 + m11 - m22;
+                q = Quaternion::new(m01 + m10, t, m12 + m21, m20 - m02);
+            }
+        } else {
+            if m00 < -m11 {
+                t = one - m00 - m11 + m22;
+                q = Quaternion::new(m20 + m02, m12 + m21, t, m01 - m10);
+            } else {
+                t = one + m00 + m11 + m22;
+                q = Quaternion::new(m12 - m21, m20 - m02, m01 - m10, t);
             }
         }
+
+        q.multipy_scalar(num!(0.5) / t.sqrt())
     }
 }
 

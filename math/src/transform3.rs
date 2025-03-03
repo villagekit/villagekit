@@ -119,7 +119,7 @@ impl Transform3 {
         let rot = Matrix3::from_axis_angle(direction, angle);
 
         // Rotate the translation (in length units) about the new origin
-        self.translation = rot.transform(self.translation);
+        self.translation = self.translation.apply_matrix3(&rot);
 
         // Rotate the linear part
         self.linear = rot * self.linear;
