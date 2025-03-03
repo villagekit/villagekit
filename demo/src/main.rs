@@ -10,9 +10,28 @@ fn main() {
 }
 
 #[derive(Clone)]
-struct Test {}
+struct BundleOfSticks {}
 
-impl Stock for Test {
+impl Assembly for BundleOfSticks {
+    fn products(&self) -> Vec<Product> {
+        vec![
+            (Stick {})
+                .place()
+                .translate(Length(num!(0)), Length(num!(0)), Length(num!(0))),
+            (Stick {})
+                .place()
+                .translate(Length(num!(2)), Length(num!(2)), Length(num!(0))),
+            (Stick {})
+                .place()
+                .translate(Length(num!(5)), Length(num!(5)), Length(num!(0))),
+        ]
+    }
+}
+
+#[derive(Clone)]
+struct Stick {}
+
+impl Stock for Stick {
     fn render(&self) -> Renderable {
         Renderable::default()
             .insert_mesh(
@@ -44,6 +63,6 @@ impl Stock for Test {
 }
 
 fn setup_model(mut commands: Commands, sandbox: Query<Entity, With<Sandbox>>) {
-    let test = Test {};
-    spawn_product(sandbox.single(), test.to_product(), &mut commands);
+    let test = BundleOfSticks {};
+    spawn_product(sandbox.single(), test.place(), &mut commands);
 }

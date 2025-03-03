@@ -26,7 +26,12 @@ pub(crate) fn process_products(
                 let renderable = stock.render();
                 spawn_renderable(entity, renderable, &mut commands);
             }
-            ProductKind::Assembly(_assembly) => todo!(),
+            ProductKind::Assembly(assembly) => {
+                let products = assembly.products();
+                for product in products {
+                    spawn_product(entity, product, &mut commands);
+                }
+            }
             ProductKind::Group(group) => {
                 for product in &group.0 {
                     spawn_product(entity, product.clone(), &mut commands);

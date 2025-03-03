@@ -4,7 +4,7 @@ use villagekit_unit::Length;
 
 pub trait Stock: DynClone {
     fn render(&self) -> Renderable;
-    fn to_product(self) -> Product
+    fn place(self) -> Product
     where
         Self: Sized + Send + Sync + 'static,
     {
@@ -14,6 +14,12 @@ pub trait Stock: DynClone {
 
 pub trait Assembly: DynClone {
     fn products(&self) -> Vec<Product>;
+    fn place(self) -> Product
+    where
+        Self: Sized + Send + Sync + 'static,
+    {
+        Product::new(ProductKind::Assembly(Box::new(self)))
+    }
 }
 
 dyn_clone::clone_trait_object!(Stock);
