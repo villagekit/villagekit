@@ -98,6 +98,28 @@ where
     }
 }
 
+impl<N> Mul<Matrix3> for Vector3<N>
+where
+    N: Copy + Mul<Number, Output = N> + Add<N, Output = N>,
+{
+    type Output = Vector3<N>;
+
+    fn mul(self, rhs: Matrix3) -> Self::Output {
+        self.apply_matrix3(&rhs)
+    }
+}
+
+impl<N> Mul<Vector3<N>> for Matrix3
+where
+    N: Copy + Mul<Number, Output = N> + Add<N, Output = N>,
+{
+    type Output = Vector3<N>;
+
+    fn mul(self, rhs: Vector3<N>) -> Self::Output {
+        rhs.apply_matrix3(&self)
+    }
+}
+
 impl<N> From<Vector3<N>> for glam::Vec3
 where
     N: Into<f32>,

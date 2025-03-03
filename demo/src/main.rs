@@ -1,6 +1,8 @@
+use std::marker::PhantomData;
+
 use bevy::prelude::*;
 
-use villagekit_engine::{Transform, *};
+use villagekit_engine::{Real, Transform, *};
 
 fn main() {
     App::new()
@@ -28,10 +30,22 @@ impl Assembly for BundleOfSticks {
     }
 }
 
+// TODO Add support for variants with custom grid units.
 #[derive(Clone)]
-struct Stick {}
+struct GridBeam {
+    length: Length,
+}
 
-impl Stock for Stick {
+impl GridBeam {
+    fn X(x: (Number, Number), y: Number, z: Number) -> Self {
+        let length = (x.0 - x.1).abs();
+
+
+        Self {}
+    }
+}
+
+impl Stock for GridBeam {
     fn render(&self) -> Renderable {
         Renderable::default()
             .insert_mesh(

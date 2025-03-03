@@ -106,17 +106,19 @@ impl Transform3 {
     /// Then update our translation and linear accordingly.
     pub fn rotate_on_axis(
         &mut self,
-        origin: Vector3<Length>,
-        direction: Vector3<Number>,
+        axis: Vector3<Number>,
         angle: Number,
+        origin: Option<Vector3<Length>>,
     ) {
+        let origin = origin.unwrap_or_default();
+
         // 1) Translate so that `origin` is at the origin.
         // We do: T -= origin
         // So effectively, we shift our current translation by -origin in world space
         self.translation = self.translation - origin;
 
         // 2) Construct the rotation matrix and apply it to the translation and linear.
-        let rot = Matrix3::from_axis_angle(direction, angle);
+        let rot = Matrix3::from_axis_angle(axis, angle);
 
         // Rotate the translation (in length units) about the new origin
         self.translation = self.translation.apply_matrix3(&rot);
@@ -126,5 +128,20 @@ impl Transform3 {
 
         // 3) Translate back to the original pivot by adding `origin` again
         self.translation = self.translation + origin;
+    }
+
+    /// Applies a change-of-basis transformation to this Transform3.
+    ///
+    /// This function assumes that the change-of-basis is represented by a
+    /// unitless Matrix3 (`basis`). The new transform is computed as:
+    ///
+    ///   - new_linear = basis * self.linear * basis.inverse()
+    ///   - new_translation = basis * self.translation
+    ///
+    /// Note: This method only applies when the change-of-basis transform
+    /// does not include any translation component.
+    pub fn change_basis(&mut self, basis: Matrix3) {
+        self.translation = basis * self.translation;
+        self.linear = basis * self.linear * basis.inverse();
     }
 }

@@ -25,6 +25,17 @@ impl Transform {
             scale,
         }
     }
+
+    pub fn rotate(
+        self,
+        axis: Vector3<Number>,
+        angle: Number,
+        origin: Option<Vector3<Length>>,
+    ) -> Self {
+        let mut transform: Transform3 = self.into();
+        transform.rotate_on_axis(axis, angle, origin);
+        transform.into()
+    }
 }
 
 impl Default for Transform {

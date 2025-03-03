@@ -35,12 +35,35 @@ impl Matrix3 {
         }
     }
 
+    pub fn zero() -> Self {
+        Self::from_cols(
+            Vector3::new(num!(0), num!(0), num!(0)),
+            Vector3::new(num!(0), num!(0), num!(0)),
+            Vector3::new(num!(0), num!(0), num!(0)),
+        )
+    }
+
     pub fn identity() -> Self {
         Self::from_rows(
             Vector3::new(num!(1), num!(0), num!(0)),
             Vector3::new(num!(0), num!(1), num!(0)),
             Vector3::new(num!(0), num!(0), num!(1)),
         )
+    }
+
+    pub fn row(&self, index: usize) -> Vector3<Number> {
+        match index {
+            0 => Vector3::new(self.x_axis.x, self.y_axis.x, self.z_axis.x),
+            1 => Vector3::new(self.x_axis.y, self.y_axis.y, self.z_axis.y),
+            2 => Vector3::new(self.x_axis.z, self.y_axis.z, self.z_axis.z),
+            _ => panic!("index out of bounds"),
+        }
+    }
+
+    pub fn set(&mut self, matrix: Self) {
+        self.x_axis = matrix.x_axis;
+        self.y_axis = matrix.y_axis;
+        self.z_axis = matrix.z_axis;
     }
 
     /// Creates a rotation matrix from a given unit Quaternion.
@@ -108,6 +131,26 @@ impl Matrix3 {
             z_axis,
         } = self;
         x_axis.dot(&y_axis.cross(z_axis))
+    }
+
+    pub fn inverse(&self) -> Self {
+        let determinant = self.determinant();
+
+        if determinant == num!(0) {
+            return Self::zero();
+        }
+
+        let determinant_inverse = num!(1) / determinant;
+
+        let cofactor_1 = self.y_axis.cross(&self.z_axis);
+        let cofactor_2 = self.z_axis.cross(&self.x_axis);
+        let cofactor_3 = self.x_axis.cross(&self.y_axis);
+
+        Self {
+            x_axis: cofactor_1 * determinant_inverse,
+            y_axis: cofactor_2 * determinant_inverse,
+            z_axis: cofactor_3 * determinant_inverse,
+        }
     }
 }
 
