@@ -26,13 +26,12 @@ impl Matrix3 {
         }
     }
 
-    /// Returns the 3×3 identity matrix.
     pub fn identity() -> Self {
-        Self {
-            x_axis: Vector3::new(num!(1), num!(0), num!(0)),
-            y_axis: Vector3::new(num!(0), num!(1), num!(0)),
-            z_axis: Vector3::new(num!(0), num!(0), num!(1)),
-        }
+        Self::new(
+            Vector3::new(num!(1), num!(0), num!(0)),
+            Vector3::new(num!(0), num!(1), num!(0)),
+            Vector3::new(num!(0), num!(0), num!(1)),
+        )
     }
 
     /// Creates a rotation matrix from a given Quaternion.
@@ -122,8 +121,6 @@ impl Matrix3 {
     }
 }
 
-/// Matrix multiplication (self * rhs).
-/// Both are 3×3, so the result is also a 3×3.
 impl Mul<Matrix3> for Matrix3 {
     type Output = Matrix3;
 
@@ -139,8 +136,12 @@ impl Mul<Matrix3> for Matrix3 {
     }
 }
 
-/// Convert a pure rotation (and possibly shear) Matrix3 into a Quaternion.
-/// (Adapted from the standard "matrix to quaternion" conversions, e.g. Three.js.)
+impl Default for Matrix3 {
+    fn default() -> Self {
+        Self::identity()
+    }
+}
+
 impl From<Matrix3> for Quaternion {
     fn from(m: Matrix3) -> Self {
         let trace = m.x_axis.x + m.y_axis.y + m.z_axis.z;
@@ -187,5 +188,80 @@ impl From<Matrix3> for Quaternion {
                 Quaternion::new(x, y, z, w)
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use villagekit_number::{num, Number};
+
+    use super::*;
+
+    #[test]
+    fn determinant_of_identity_matrix() {
+        let expected = num!(1);
+        let matrix = Matrix3::identity();
+        let actual = matrix.determinant();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn determinant_of_singular_matrix() {
+        let expected = num!(0);
+        let matrix = Matrix3::new(
+            Vector3::new(num!(1), num!(2), num!(3)),
+            Vector3::new(num!(4), num!(5), num!(6)),
+            Vector3::new(num!(7), num!(8), num!(9)),
+        );
+        let actual = matrix.determinant();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn determinant_of_lower_triagular_matrix() {
+        let expected = num!(7) * num!(2) * num!(5);
+        let matrix = Matrix3::new(
+            Vector3::new(num!(7), num!(0), num!(0)),
+            Vector3::new(num!(1), num!(2), num!(0)),
+            Vector3::new(num!(3), num!(4), num!(5)),
+        );
+        let actual = matrix.determinant();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn determinant_of_upper_triangular_matrix() {
+        let expected = num!(5) * num!(3) * num!(6);
+        let matrix = Matrix3::new(
+            Vector3::new(num!(5), num!(2), num!(-1)),
+            Vector3::new(num!(0), num!(3), num!(4)),
+            Vector3::new(num!(0), num!(0), num!(6)),
+        );
+        let actual = matrix.determinant();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn determinant_of_random_positive_matrix() {
+        let expected = num!(-33);
+        let matrix = Matrix3::new(
+            Vector3::new(num!(3), num!(1), num!(4)),
+            Vector3::new(num!(2), num!(0), num!(5)),
+            Vector3::new(num!(7), num!(8), num!(6)),
+        );
+        let actual = matrix.determinant();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn determinant_of_random_negative_matrix() {
+        let expected = num!(139);
+        let matrix = Matrix3::new(
+            Vector3::new(num!(-3), num!(1), num!(2)),
+            Vector3::new(num!(0), num!(-4), num!(5)),
+            Vector3::new(num!(7), num!(8), num!(-6)),
+        );
+        let actual = matrix.determinant();
+        assert_eq!(expected, actual);
     }
 }

@@ -1,6 +1,6 @@
 use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
-use villagekit_math::{Quaternion, Vector3};
+use villagekit_math::{Quaternion, Transform3, Vector3};
 use villagekit_number::{num, Number};
 use villagekit_unit::Length;
 
@@ -37,12 +37,26 @@ impl Default for Transform {
     }
 }
 
-impl From<Matrix4> for Transform {
-    fn from(value: Matrix4) -> Self {}
+impl From<Transform3> for Transform {
+    fn from(value: Transform3) -> Self {
+        let (translation, rotation, scale) = value.to_translation_rotation_scale();
+        Self {
+            translation,
+            rotation,
+            scale,
+        }
+    }
 }
 
-impl From<Transform> for Matrix {
-    fn from(value: Transform) -> Self {}
+impl From<Transform> for Transform3 {
+    fn from(value: Transform) -> Self {
+        let Transform {
+            translation,
+            rotation,
+            scale,
+        } = value;
+        Self::from_translation_rotation_scale(translation, rotation, scale)
+    }
 }
 
 impl From<Transform> for BevyTransform {
