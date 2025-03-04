@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use bevy::prelude::*;
 
-use villagekit_engine::{Real, Transform, *};
+use villagekit_engine::{traits::*, Transform, *};
 
 fn main() {
     App::new()
@@ -17,35 +17,62 @@ struct BundleOfSticks {}
 impl Assembly for BundleOfSticks {
     fn products(&self) -> Vec<Product> {
         vec![
-            (Stick {})
-                .place()
-                .translate(Length(num!(0)), Length(num!(0)), Length(num!(0))),
-            (Stick {})
-                .place()
-                .translate(Length(num!(2)), Length(num!(2)), Length(num!(0))),
-            (Stick {})
-                .place()
-                .translate(Length(num!(5)), Length(num!(5)), Length(num!(0))),
+            Beam::x(
+                (Length(num!(0)), Length(num!(10))),
+                Length(num!(0)),
+                Length(num!(0)),
+            ),
+            Beam::y(
+                Length(num!(0)),
+                (Length(num!(0)), Length(num!(10))),
+                Length(num!(0)),
+            ),
         ]
     }
 }
 
 // TODO Add support for variants with custom grid units.
 #[derive(Clone)]
-struct GridBeam {
+struct Beam {
     length: Length,
 }
 
-impl GridBeam {
-    fn X(x: (Number, Number), y: Number, z: Number) -> Self {
+impl Beam {
+    fn x(x: (Length, Length), y: Length, z: Length) -> Product {
         let length = (x.0 - x.1).abs();
 
+        let mut beam = Self { length }.place();
 
-        Self {}
+        if x.0 > x.1 {
+            beam = beam.mirror_x()
+        }
+
+        beam.translate(x.0, y, z)
+    }
+
+    fn y(x: Length, y: (Length, Length), z: Length) -> Product {
+        let length = (y.0 - y.1).abs();
+
+        let mut beam = Self { length }.place();
+
+        let x_axis = Vector3::new(num!(1), num!(0), num!(0));
+        let y_axis = Vector3::new(num!(0), num!(1), num!(0));
+        let z_axis = Vector3::new(num!(0), num!(0), num!(1));
+        beam = beam.change_basis(Matrix3 {
+            x_axis: y_axis,
+            y_axis: x_axis,
+            z_axis,
+        });
+
+        if y.0 > y.1 {
+            beam = beam.mirror_y()
+        }
+
+        beam.translate(x, y.0, z)
     }
 }
 
-impl Stock for GridBeam {
+impl Stock for Beam {
     fn render(&self) -> Renderable {
         Renderable::default()
             .insert_mesh(

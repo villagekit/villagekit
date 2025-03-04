@@ -1,8 +1,7 @@
-use bevy_math::Vec3;
 use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
 use villagekit_math::{Matrix3, Quaternion, Vector3};
-use villagekit_number::{num, Number};
+use villagekit_number::Number;
 use villagekit_unit::Length;
 
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
@@ -19,9 +18,9 @@ impl Transform {
         }
     }
 
-    pub fn rotate(self, rotation: Quaternion) -> Self {
+    pub fn rotate_with_quaternion(self, quaternion: Quaternion) -> Self {
         Self {
-            linear: self.linear * Matrix3::from_quaternion(rotation),
+            linear: self.linear * Matrix3::from_quaternion(quaternion),
             ..self
         }
     }
@@ -34,7 +33,7 @@ impl Transform {
     }
 
     /// Rotate this transform around an arbitrary axis that passes through a given origin.
-    pub fn rotate_on_axis(
+    pub fn rotate(
         self,
         axis: Vector3<Number>,
         angle: Number,
@@ -62,15 +61,6 @@ impl Transform {
         Self {
             translation: basis * self.translation,
             linear: basis * self.linear * basis.inverse(),
-        }
-    }
-
-    /// Applies a mirror transformation to this Transform.
-    pub fn mirror_on_axis(self, axis: Vector3<Number>) -> Self {
-        let transformer = Matrix3::from_mirror_axis(axis);
-        Self {
-            translation: transformer * self.translation,
-            linear: transformer * self.linear,
         }
     }
 }

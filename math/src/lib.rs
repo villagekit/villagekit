@@ -10,7 +10,7 @@ pub use vector3::*;
 
 #[cfg(test)]
 mod tests {
-    use villagekit_number::{num, ops::Sqrt, Number};
+    use villagekit_number::{num, traits::Sqrt, Number};
     use villagekit_unit::Length;
 
     use super::*;

@@ -43,6 +43,7 @@ impl Matrix3 {
         )
     }
 
+    // TODO remove
     /// Note: Assumes axis is normalized.
     pub fn from_mirror_axis(axis: Vector3<Number>) -> Self {
         let identity = Self::identity();
@@ -102,6 +103,7 @@ impl Matrix3 {
         }
     }
 
+    // TODO remove
     pub fn row(&self, index: usize) -> Vector3<Number> {
         match index {
             0 => Vector3::new(self.x_axis.x, self.y_axis.x, self.z_axis.x),
@@ -117,10 +119,12 @@ impl Matrix3 {
         self.z_axis = matrix.z_axis;
     }
 
+    // TODO use
     pub fn transpose(&self) -> Self {
         Self::from_rows(self.x_axis, self.y_axis, self.z_axis)
     }
 
+    // TODO remove
     /// Creates a rotation matrix from a given unit Quaternion.
     pub fn from_quaternion(q: Quaternion) -> Self {
         // TODO Update to use the non-unit formula: https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
@@ -162,6 +166,7 @@ impl Matrix3 {
         }
     }
 
+    // TODO remove
     /// Creates a pure rotation matrix from axis + angle (Rodrigues' formula),
     /// by first building a Quaternion and then converting it.
     pub fn from_axis_angle(axis: Vector3<Number>, angle: Number) -> Self {

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Sub};
 use villagekit_number::{
     num,
-    traits::{One, Sqrt, Zero},
+    traits::{Abs, One, Real, Sqrt, Zero},
     Number,
 };
 
@@ -74,14 +74,6 @@ impl Div<Volume> for Volume {
     }
 }
 
-impl Sqrt for Volume {
-    type Output = Area;
-
-    fn sqrt(self) -> Self::Output {
-        Area(self.0.sqrt())
-    }
-}
-
 impl Zero for Volume {
     fn zero() -> Self {
         Self(Number::zero())
@@ -91,6 +83,22 @@ impl Zero for Volume {
 impl One for Volume {
     fn one() -> Self {
         Self(Number::one())
+    }
+}
+
+impl Sqrt for Volume {
+    type Output = Area;
+
+    fn sqrt(self) -> Self::Output {
+        Area(Sqrt::sqrt(self.0))
+    }
+}
+
+impl Abs for Volume {
+    type Output = Self;
+
+    fn abs(self) -> Self::Output {
+        Self(self.0.abs())
     }
 }
 
