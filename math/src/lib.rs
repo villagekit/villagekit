@@ -1,11 +1,11 @@
+mod affine3;
 mod matrix3;
 mod quaternion;
-mod transform3;
 mod vector3;
 
+pub use affine3::*;
 pub use matrix3::*;
 pub use quaternion::*;
-pub use transform3::*;
 pub use vector3::*;
 
 #[cfg(test)]

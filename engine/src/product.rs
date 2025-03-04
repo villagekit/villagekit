@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use bevy::prelude::*;
 use villagekit_product::{Product, ProductKind};
 
@@ -10,6 +12,7 @@ pub struct ProductObject(ProductKind);
 pub fn spawn_product(parent: Entity, product: Product, commands: &mut Commands) {
     let Product { kind, transform } = product;
     let transform: Transform = transform.into();
+    println!("product transform {:?}", transform);
     commands.entity(parent).with_children(|p| {
         p.spawn((ProductObject(kind), transform));
     });
