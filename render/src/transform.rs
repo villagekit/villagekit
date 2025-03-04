@@ -1,66 +1,76 @@
 use bevy_math::Vec3;
 use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
-use villagekit_math::{Quaternion, Transform3, Vector3};
+use villagekit_math::{Matrix3, Quaternion, Vector3};
 use villagekit_number::{num, Number};
 use villagekit_unit::Length;
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
 pub struct Transform {
     translation: Vector3<Length>,
-    rotation: Quaternion,
+    linear: Matrix3,
 }
 
 impl Transform {
-    pub fn set_translation(&mut self, translation: Vector3<Length>) {
-        self.translation = translation;
-    }
-
-    pub fn set_rotation(&mut self, rotation: Quaternion) {
-        self.rotation = rotation;
-    }
-
     pub fn translate(self, x: Length, y: Length, z: Length) -> Self {
         Self {
             translation: self.translation + Vector3::new(x, y, z),
-            rotation: self.rotation,
+            ..self
         }
     }
 
     pub fn rotate(self, rotation: Quaternion) -> Self {
         Self {
-            translation: self.translation,
-            rotation: self.rotation * rotation,
+            linear: self.linear * Matrix3::from_quaternion(rotation),
+            ..self
         }
     }
 
+    pub fn scale(self, scale: Vector3<Number>) -> Self {
+        Self {
+            linear: self.linear * Matrix3::from_diagonal(scale),
+            ..self
+        }
+    }
+
+    /// Rotate this transform around an arbitrary axis that passes through a given origin.
     pub fn rotate_on_axis(
         self,
         axis: Vector3<Number>,
         angle: Number,
         origin: Option<Vector3<Length>>,
     ) -> Self {
-        let mut transform: Transform3 = self.into();
-        transform.rotate_on_axis(axis, angle, origin);
-        transform.into()
-    }
+        let origin = origin.unwrap_or_default();
+        let rotation = Matrix3::from_axis_angle(axis, angle);
 
-    /// Mirrors the transform along the given axis by applying a reflection matrix.
-    /// Note: Assumes axis is normalized.
-    pub fn mirror_along_axis(&mut self, axis: Vector3<Number>) {
-        // Reflect the translation along the axis (reflection: R * translation)
-        self.translation = self.translation.remap(axis);
+        // - Translate so that `origin` is at the origin.
+        // - Rotate the translation (in length units) about the new origin
+        // - Translate back to the original pivot by adding `origin` again
+        let translation = (self.translation - origin) * rotation + origin;
 
-        // Scale the rotation matrix by the reflection factor
-        self.rotation = self.rotation.reflect_along_axis(u);
-    }
-}
+        // Rotate the linear part
+        let linear = self.linear * rotation;
 
-impl Default for Transform {
-    fn default() -> Self {
         Self {
-            translation: Vector3::default(),
-            rotation: Quaternion::default(),
+            translation,
+            linear,
+        }
+    }
+
+    /// Applies a change-of-basis transformation to this Transform.
+    pub fn change_basis(self, basis: Matrix3) -> Self {
+        Self {
+            translation: basis * self.translation,
+            linear: basis * self.linear * basis.inverse(),
+        }
+    }
+
+    /// Applies a mirror transformation to this Transform.
+    pub fn mirror_on_axis(self, axis: Vector3<Number>) -> Self {
+        let transformer = Matrix3::from_mirror_axis(axis);
+        Self {
+            translation: transformer * self.translation,
+            linear: transformer * self.linear,
         }
     }
 }
@@ -69,12 +79,13 @@ impl From<Transform> for BevyTransform {
     fn from(value: Transform) -> Self {
         let Transform {
             translation,
-            rotation,
+            linear,
         } = value;
+        let (rotation, scale) = linear.to_rotation_scale();
         BevyTransform {
             translation: translation.into(),
             rotation: rotation.into(),
-            scale: Vec3::new(1_f32, 1_f32, 1_f32),
+            scale: scale.into(),
         }
     }
 }

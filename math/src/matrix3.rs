@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::quaternion::Quaternion;
 use crate::vector3::Vector3;
-use villagekit_number::{num, traits::Sqrt, Number};
+use villagekit_number::{self as number, num, Number, Real};
 
 /// A 3×3 matrix represented by three basis vectors (columns).
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
@@ -41,6 +41,13 @@ impl Matrix3 {
             Vector3::new(num!(0), diagonal.y, num!(0)),
             Vector3::new(num!(0), num!(0), diagonal.z),
         )
+    }
+
+    /// Note: Assumes axis is normalized.
+    pub fn from_mirror_axis(axis: Vector3<Number>) -> Self {
+        let identity = Self::identity();
+        let outer_product = axis.outer(&axis);
+        identity - num!(2) * outer_product
     }
 
     pub fn zero() -> Self {
@@ -93,13 +100,6 @@ impl Matrix3 {
             y_axis: self * other.y_axis,
             z_axis: self * other.z_axis,
         }
-    }
-
-    /// Note: Assumes axis is normalized.
-    pub fn mirror(axis: Vector3<Number>) -> Self {
-        let identity = Self::identity();
-        let outer_product = axis.outer(&axis);
-        identity - num!(2) * outer_product
     }
 
     pub fn row(&self, index: usize) -> Vector3<Number> {
@@ -198,6 +198,65 @@ impl Matrix3 {
             z_axis: cofactor_3 * determinant_inverse,
         }
     }
+
+    /// Decompose this transform into (translation, quaternion, scale),
+    /// following an approach similar to Three.js's `Matrix4.decompose`.
+    ///
+    /// The steps:
+    /// 1) Extract scale from the column vectors' lengths (sx, sy, sz).
+    /// 2) If the determinant is negative, flip one axis (e.g. sx = -sx).
+    /// 3) Read the translation from `translation`.
+    /// 4) Remove scale from `linear` to get a pure rotation+shear matrix.
+    /// 5) Convert that to a `Quaternion`.
+    /// 6) Return (translation, quaternion, scale).
+    pub fn to_rotation_scale(&self) -> (Quaternion, Vector3<Number>) {
+        // Step 1: measure the scale = magnitude of each column
+        let sx = self.x_axis.magnitude();
+        let sy = self.y_axis.magnitude();
+        let sz = self.z_axis.magnitude();
+
+        // Step 2: if determinant is negative, invert one axis's sign
+        let det = self.determinant();
+        let (sx, sy, sz) = if det < num!(0) {
+            // e.g., flip X
+            (-sx, sy, sz)
+        } else {
+            (sx, sy, sz)
+        };
+
+        // Step 4: remove scale from each basis vector. This produces a
+        // rotation+shear matrix that we can interpret as purely rotational
+        // if there's no leftover shear. But if there's shear, we still produce a
+        // best-fit quaternion.
+        let inv_sx = if sx.abs() > num!(0) {
+            num!(1) / sx
+        } else {
+            num!(0)
+        };
+        let inv_sy = if sy.abs() > num!(0) {
+            num!(1) / sy
+        } else {
+            num!(0)
+        };
+        let inv_sz = if sz.abs() > num!(0) {
+            num!(1) / sz
+        } else {
+            num!(0)
+        };
+
+        // unscaled columns
+        let rot_x = self.x_axis * inv_sx;
+        let rot_y = self.y_axis * inv_sy;
+        let rot_z = self.z_axis * inv_sz;
+
+        // Step 5: build a pure rotation matrix from that, then convert to Quaternion
+        let rot_matrix = Matrix3::from_cols(rot_x, rot_y, rot_z);
+        let quaternion: Quaternion = rot_matrix.into();
+
+        let scale = Vector3::new(sx, sy, sz);
+
+        (quaternion, scale)
+    }
 }
 
 impl Add<Matrix3> for Matrix3 {
@@ -292,7 +351,7 @@ impl From<Matrix3> for Quaternion {
             }
         }
 
-        q.multipy_scalar(num!(0.5) / t.sqrt())
+        q.multipy_scalar(num!(0.5) / number::traits::Sqrt::sqrt(t))
     }
 }
 
