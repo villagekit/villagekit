@@ -57,10 +57,12 @@ impl Transform {
     }
 
     /// Applies a change-of-basis transformation to this Transform.
+    /// https://math.stackexchange.com/questions/628061/how-to-construct-change-of-basis-matrix/628075#628075
     pub fn change_basis(self, basis: Matrix3) -> Self {
+        let transformation = Matrix3::identity().transpose() * basis;
         Self {
-            translation: basis * self.translation,
-            linear: basis * self.linear * basis.inverse(),
+            translation: self.translation * transformation,
+            linear: self.linear * transformation,
         }
     }
 }

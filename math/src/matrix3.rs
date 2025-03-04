@@ -1,4 +1,7 @@
-use std::ops::{Add, Mul, Sub};
+use std::{
+    fmt::Display,
+    ops::{Add, Mul, Sub},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -119,7 +122,6 @@ impl Matrix3 {
         self.z_axis = matrix.z_axis;
     }
 
-    // TODO use
     pub fn transpose(&self) -> Self {
         Self::from_rows(self.x_axis, self.y_axis, self.z_axis)
     }
@@ -261,6 +263,12 @@ impl Matrix3 {
         let scale = Vector3::new(sx, sy, sz);
 
         (quaternion, scale)
+    }
+}
+
+impl Display for Matrix3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {}, {})", self.x_axis, self.y_axis, self.z_axis)
     }
 }
 

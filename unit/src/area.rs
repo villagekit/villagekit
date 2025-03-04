@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::ops::{Add, Div, Mul, Sub};
+use std::{
+    fmt::Display,
+    ops::{Add, Div, Mul, Sub},
+};
 use villagekit_number::{
     num,
     traits::{Abs, One, Real, Sqrt, Zero},
@@ -11,6 +14,12 @@ use crate::{Length, Volume};
 // Canonical value is meter^2
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Area(pub Number);
+
+impl Display for Area {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}m^2", self.0)
+    }
+}
 
 impl From<Area> for f32 {
     fn from(value: Area) -> Self {

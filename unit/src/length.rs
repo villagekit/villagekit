@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::ops::{Add, Div, Mul, Sub};
+use std::{
+    fmt::Display,
+    ops::{Add, Div, Mul, Sub},
+};
 use villagekit_number::{
     num,
     traits::{Abs, One, Real, Sqrt, Zero},
@@ -11,6 +14,12 @@ use crate::{Area, Volume};
 // Canonical value is meter
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Length(pub Number);
+
+impl Display for Length {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}m", self.0)
+    }
+}
 
 impl Add for Length {
     type Output = Length;

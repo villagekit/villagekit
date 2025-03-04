@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::ops::{Add, Div, Mul, Sub};
+use std::{
+    fmt::Display,
+    ops::{Add, Div, Mul, Sub},
+};
 use villagekit_number::{
     num,
     traits::{One, Sqrt, Zero},
@@ -18,6 +21,12 @@ pub struct Vector3<N> {
 impl<N> Vector3<N> {
     pub fn new(x: N, y: N, z: N) -> Self {
         Self { x, y, z }
+    }
+}
+
+impl<N: Display> Display for Vector3<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }
 

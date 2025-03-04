@@ -26,7 +26,8 @@ impl Assembly for BundleOfSticks {
                 Length(num!(0)),
                 (Length(num!(0)), Length(num!(10))),
                 Length(num!(0)),
-            ),
+            )
+            .translate(Length(num!(5)), Length(num!(0)), Length(num!(0))),
         ]
     }
 }
