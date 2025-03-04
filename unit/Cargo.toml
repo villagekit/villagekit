@@ -6,3 +6,4 @@ edition.workspace = true
 [dependencies]
 villagekit-number = { path = "../number" }
 serde.workspace = true
+num-traits.workspace = true

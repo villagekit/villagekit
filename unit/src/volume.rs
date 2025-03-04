@@ -1,3 +1,4 @@
+use num_traits::{One, Zero};
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Sub};
 use villagekit_number::{num, ops::Sqrt, Number};
@@ -75,6 +76,24 @@ impl Sqrt for Volume {
 
     fn sqrt(self) -> Self::Output {
         Area(self.0.sqrt())
+    }
+}
+
+impl Zero for Volume {
+    fn zero() -> Self {
+        Self(Number::zero())
+    }
+    fn is_zero(&self) -> bool {
+        Number::is_zero(&self.0)
+    }
+}
+
+impl One for Volume {
+    fn one() -> Self {
+        Self(Number::one())
+    }
+    fn is_one(&self) -> bool {
+        Number::is_one(&self.0)
     }
 }
 

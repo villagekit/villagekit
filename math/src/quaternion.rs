@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::ops;
+use std::ops::{self, Mul};
 use villagekit_number::{num, Number, Real};
 
 use crate::vector3::Vector3;
@@ -24,17 +24,15 @@ impl Quaternion {
         Self { x, y, z, w }
     }
     pub fn multiply(self, other: Quaternion) -> Self {
-        Quaternion::multiply_quaternions(self, other)
-    }
-    pub fn premultiply(self, other: Quaternion) -> Self {
-        Quaternion::multiply_quaternions(other, self)
-    }
-    pub fn multiply_quaternions(a: Quaternion, b: Quaternion) -> Self {
+        let (a, b) = (self, other);
         let x = a.x * b.w + a.w * b.x + a.y * b.z - a.z * b.y;
         let y = a.y * b.w + a.w * b.y + a.z * b.x - a.x * b.z;
         let z = a.z * b.w + a.w * b.z + a.x * b.y - a.y * b.x;
         let w = a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z;
         Self { x, y, z, w }
+    }
+    pub fn premultiply(self, other: Quaternion) -> Self {
+        other.multiply(self)
     }
     pub fn multipy_scalar(self, n: Number) -> Self {
         let Self { x, y, z, w } = self;
@@ -50,6 +48,14 @@ impl Default for Quaternion {
             z: num!(0),
             w: num!(1),
         }
+    }
+}
+
+impl Mul for Quaternion {
+    type Output = Quaternion;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.multiply(rhs)
     }
 }
 

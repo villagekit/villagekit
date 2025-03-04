@@ -66,6 +66,10 @@ impl Matrix3 {
         self.z_axis = matrix.z_axis;
     }
 
+    pub fn transpose(&self) -> Self {
+        Self::from_rows(self.x_axis, self.y_axis, self.z_axis)
+    }
+
     /// Creates a rotation matrix from a given unit Quaternion.
     pub fn from_quaternion(q: Quaternion) -> Self {
         // TODO Update to use the non-unit formula: https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion

@@ -1,3 +1,4 @@
+use bevy_math::Vec3;
 use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
 use villagekit_math::{Quaternion, Transform3, Vector3};
@@ -8,25 +9,32 @@ use villagekit_unit::Length;
 pub struct Transform {
     translation: Vector3<Length>,
     rotation: Quaternion,
-    scale: Vector3<Number>,
 }
 
 impl Transform {
+    pub fn set_translation(&mut self, translation: Vector3<Length>) {
+        self.translation = translation;
+    }
+
+    pub fn set_rotation(&mut self, rotation: Quaternion) {
+        self.rotation = rotation;
+    }
+
     pub fn translate(self, x: Length, y: Length, z: Length) -> Self {
-        let Self {
-            translation,
-            rotation,
-            scale,
-        } = self;
-        let translation = translation + Vector3::new(x, y, z);
         Self {
-            translation,
-            rotation,
-            scale,
+            translation: self.translation + Vector3::new(x, y, z),
+            rotation: self.rotation,
         }
     }
 
-    pub fn rotate(
+    pub fn rotate(self, rotation: Quaternion) -> Self {
+        Self {
+            translation: self.translation,
+            rotation: self.rotation * rotation,
+        }
+    }
+
+    pub fn rotate_on_axis(
         self,
         axis: Vector3<Number>,
         angle: Number,
@@ -36,6 +44,18 @@ impl Transform {
         transform.rotate_on_axis(axis, angle, origin);
         transform.into()
     }
+
+    /// Mirrors the transform along the given axis by applying a reflection matrix.
+    pub fn mirror_along_axis(&mut self, axis: Vector3<Number>) {
+        // Normalize the axis
+        let u = axis.normalized();
+
+        // Reflect the translation along the axis (reflection: R * translation)
+        self.translation = self.translation.reflect_along_axis(u);
+
+        // Scale the rotation matrix by the reflection factor
+        self.rotation = self.rotation.reflect_along_axis(u);
+    }
 }
 
 impl Default for Transform {
@@ -43,30 +63,7 @@ impl Default for Transform {
         Self {
             translation: Vector3::default(),
             rotation: Quaternion::default(),
-            scale: Vector3::new(num!(1), num!(1), num!(1)),
         }
-    }
-}
-
-impl From<Transform3> for Transform {
-    fn from(value: Transform3) -> Self {
-        let (translation, rotation, scale) = value.to_translation_rotation_scale();
-        Self {
-            translation,
-            rotation,
-            scale,
-        }
-    }
-}
-
-impl From<Transform> for Transform3 {
-    fn from(value: Transform) -> Self {
-        let Transform {
-            translation,
-            rotation,
-            scale,
-        } = value;
-        Self::from_translation_rotation_scale(translation, rotation, scale)
     }
 }
 
@@ -75,12 +72,11 @@ impl From<Transform> for BevyTransform {
         let Transform {
             translation,
             rotation,
-            scale,
         } = value;
         BevyTransform {
             translation: translation.into(),
             rotation: rotation.into(),
-            scale: scale.into(),
+            scale: Vec3::new(1_f32, 1_f32, 1_f32),
         }
     }
 }
