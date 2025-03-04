@@ -46,12 +46,10 @@ impl Transform {
     }
 
     /// Mirrors the transform along the given axis by applying a reflection matrix.
+    /// Note: Assumes axis is normalized.
     pub fn mirror_along_axis(&mut self, axis: Vector3<Number>) {
-        // Normalize the axis
-        let u = axis.normalized();
-
         // Reflect the translation along the axis (reflection: R * translation)
-        self.translation = self.translation.reflect_along_axis(u);
+        self.translation = self.translation.remap(axis);
 
         // Scale the rotation matrix by the reflection factor
         self.rotation = self.rotation.reflect_along_axis(u);

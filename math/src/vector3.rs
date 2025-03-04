@@ -1,7 +1,10 @@
-use num_traits::Zero;
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Sub};
-use villagekit_number::{num, ops::Sqrt, Number};
+use villagekit_number::{
+    num,
+    traits::{One, Sqrt, Zero},
+    Number,
+};
 
 use crate::Matrix3;
 
@@ -84,12 +87,18 @@ where
 
 impl<N> Vector3<N>
 where
-    N: Copy + Add<Output = N> + Mul + Div<Output = N>,
+    N: Copy,
+    // self.magnitude()
+    N: Add<Output = N> + Mul,
     <N as Mul>::Output: Add<Output = <N as Mul>::Output> + Sqrt<Output = N>,
+    // (...) / N::one()
+    N: One + Div<N, Output = Number>,
+    // (...) / magnitude
+    N: Div<Number, Output = N>,
 {
     pub fn normalize(self) -> Self {
-        let magnitude = self.magnitude();
-        // TODO check for division by zero
+        let magnitude = self.magnitude() / N::one();
+        // TODO check for division by zero?
         Self {
             x: self.x / magnitude,
             y: self.y / magnitude,
@@ -119,6 +128,16 @@ where
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
+        )
+    }
+}
+
+impl Vector3<Number> {
+    pub fn outer(&self, other: &Vector3<Number>) -> Matrix3 {
+        Matrix3::from_cols(
+            self.multiply_scalar(other.x),
+            self.multiply_scalar(other.y),
+            self.multiply_scalar(other.z),
         )
     }
 }

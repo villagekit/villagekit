@@ -1,7 +1,10 @@
-use num_traits::{One, Zero};
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Sub};
-use villagekit_number::{num, ops::Sqrt, Number};
+use villagekit_number::{
+    num,
+    traits::{One, Sqrt, Zero},
+    Number,
+};
 
 use crate::{Area, Volume};
 
@@ -85,17 +88,11 @@ impl Zero for Length {
     fn zero() -> Self {
         Self(Number::zero())
     }
-    fn is_zero(&self) -> bool {
-        Number::is_zero(&self.0)
-    }
 }
 
 impl One for Length {
     fn one() -> Self {
         Self(Number::one())
-    }
-    fn is_one(&self) -> bool {
-        Number::is_one(&self.0)
     }
 }
 

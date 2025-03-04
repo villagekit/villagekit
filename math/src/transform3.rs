@@ -28,7 +28,7 @@ impl Transform3 {
         scale: Vector3<Number>,
     ) -> Self {
         let rot_matrix = Matrix3::from_quaternion(rotation);
-        let scale_matrix = Matrix3::from_scale(scale);
+        let scale_matrix = Matrix3::from_diagonal(scale);
         let linear = rot_matrix * scale_matrix; // R*S
         Self {
             linear,

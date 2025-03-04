@@ -5,3 +5,11 @@ pub trait Sqrt {
 
     fn sqrt(self) -> Self::Output;
 }
+
+pub trait Zero {
+    fn zero() -> Self;
+}
+
+pub trait One {
+    fn one() -> Self;
+}

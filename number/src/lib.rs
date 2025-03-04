@@ -1,13 +1,16 @@
-pub mod ops;
+pub mod traits;
 
 use fastnum::{
     decimal::{Context, Decimal, ParseError},
     D256,
 };
-use num_derive::{FromPrimitive, Neg, Num, NumCast, NumOps, One, Real, ToPrimitive, Zero};
+use num_derive::{
+    FromPrimitive, Neg, Num, NumCast, NumOps, One as OneDerive, Real, ToPrimitive,
+    Zero as ZeroDerive,
+};
 pub use num_traits::real::Real;
-use ops::Sqrt;
 use serde::{Deserialize, Serialize};
+use traits::{One, Sqrt, Zero};
 
 #[derive(
     Debug,
@@ -20,8 +23,8 @@ use serde::{Deserialize, Serialize};
     Hash,
     Serialize,
     Deserialize,
-    Zero,
-    One,
+    ZeroDerive,
+    OneDerive,
     NumOps,
     Num,
     ToPrimitive,
@@ -68,6 +71,18 @@ impl Sqrt for Number {
 
     fn sqrt(self) -> Self::Output {
         <Self as Real>::sqrt(self)
+    }
+}
+
+impl Zero for Number {
+    fn zero() -> Self {
+        num!(0)
+    }
+}
+
+impl One for Number {
+    fn one() -> Self {
+        num!(1)
     }
 }
 

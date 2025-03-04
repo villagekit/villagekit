@@ -1,10 +1,10 @@
-use std::ops::{Add, Mul};
+use std::ops::{Add, Mul, Sub};
 
 use serde::{Deserialize, Serialize};
 
 use crate::quaternion::Quaternion;
 use crate::vector3::Vector3;
-use villagekit_number::{num, ops::Sqrt, Number};
+use villagekit_number::{num, traits::Sqrt, Number};
 
 /// A 3×3 matrix represented by three basis vectors (columns).
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
@@ -35,6 +35,14 @@ impl Matrix3 {
         }
     }
 
+    pub fn from_diagonal(diagonal: Vector3<Number>) -> Self {
+        Self::from_rows(
+            Vector3::new(diagonal.x, num!(0), num!(0)),
+            Vector3::new(num!(0), diagonal.y, num!(0)),
+            Vector3::new(num!(0), num!(0), diagonal.z),
+        )
+    }
+
     pub fn zero() -> Self {
         Self::from_cols(
             Vector3::new(num!(0), num!(0), num!(0)),
@@ -49,6 +57,49 @@ impl Matrix3 {
             Vector3::new(num!(0), num!(1), num!(0)),
             Vector3::new(num!(0), num!(0), num!(1)),
         )
+    }
+
+    pub fn add_matrix3(self, other: Self) -> Self {
+        Self {
+            x_axis: self.x_axis + other.x_axis,
+            y_axis: self.x_axis + other.y_axis,
+            z_axis: self.x_axis + other.z_axis,
+        }
+    }
+
+    pub fn sub_matrix3(self, other: Self) -> Self {
+        Self {
+            x_axis: self.x_axis - other.x_axis,
+            y_axis: self.x_axis - other.y_axis,
+            z_axis: self.x_axis - other.z_axis,
+        }
+    }
+
+    pub fn mul_number(&self, other: Number) -> Self {
+        Self {
+            x_axis: self.x_axis * other,
+            y_axis: self.y_axis * other,
+            z_axis: self.z_axis * other,
+        }
+    }
+
+    pub fn mul_vector3(&self, other: Vector3<Number>) -> Vector3<Number> {
+        other.apply_matrix3(self)
+    }
+
+    pub fn mul_matrix3(self, other: Self) -> Self {
+        Self {
+            x_axis: self * other.x_axis,
+            y_axis: self * other.y_axis,
+            z_axis: self * other.z_axis,
+        }
+    }
+
+    /// Note: Assumes axis is normalized.
+    pub fn mirror(axis: Vector3<Number>) -> Self {
+        let identity = Self::identity();
+        let outer_product = axis.outer(&axis);
+        identity - num!(2) * outer_product
     }
 
     pub fn row(&self, index: usize) -> Vector3<Number> {
@@ -118,15 +169,6 @@ impl Matrix3 {
         Self::from_quaternion(q)
     }
 
-    /// Creates a scale matrix (no rotation) from a scale vector.
-    pub fn from_scale(scale: Vector3<Number>) -> Self {
-        Self {
-            x_axis: Vector3::new(scale.x, num!(0), num!(0)),
-            y_axis: Vector3::new(num!(0), scale.y, num!(0)),
-            z_axis: Vector3::new(num!(0), num!(0), scale.z),
-        }
-    }
-
     /// Compute the determinant of a Matrix3.
     pub fn determinant(&self) -> Number {
         let Self {
@@ -158,18 +200,43 @@ impl Matrix3 {
     }
 }
 
+impl Add<Matrix3> for Matrix3 {
+    type Output = Matrix3;
+
+    fn add(self, rhs: Matrix3) -> Self::Output {
+        self.add_matrix3(rhs)
+    }
+}
+
+impl Sub<Matrix3> for Matrix3 {
+    type Output = Matrix3;
+
+    fn sub(self, rhs: Matrix3) -> Self::Output {
+        self.sub_matrix3(rhs)
+    }
+}
+
+impl Mul<Number> for Matrix3 {
+    type Output = Matrix3;
+
+    fn mul(self, rhs: Number) -> Self::Output {
+        self.mul_number(rhs)
+    }
+}
+
+impl Mul<Matrix3> for Number {
+    type Output = Matrix3;
+
+    fn mul(self, rhs: Matrix3) -> Self::Output {
+        rhs.mul_number(self)
+    }
+}
+
 impl Mul<Matrix3> for Matrix3 {
     type Output = Matrix3;
 
     fn mul(self, rhs: Matrix3) -> Self::Output {
-        let c0 = Vector3::new(rhs.x_axis.x, rhs.x_axis.y, rhs.x_axis.z).apply_matrix3(&self);
-        let c1 = Vector3::new(rhs.y_axis.x, rhs.y_axis.y, rhs.y_axis.z).apply_matrix3(&self);
-        let c2 = Vector3::new(rhs.z_axis.x, rhs.z_axis.y, rhs.z_axis.z).apply_matrix3(&self);
-        Self {
-            x_axis: c0,
-            y_axis: c1,
-            z_axis: c2,
-        }
+        self.mul_matrix3(rhs)
     }
 }
 
