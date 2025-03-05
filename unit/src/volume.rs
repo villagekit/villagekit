@@ -5,7 +5,7 @@ use std::{
 };
 use villagekit_number::{
     num,
-    traits::{Abs, ApproxEq, One, Real, Sqrt, Zero},
+    traits::{Abs, ApproxEq, One, Sqrt, Zero},
     Number,
 };
 
@@ -99,7 +99,7 @@ impl Sqrt for Volume {
     type Output = Area;
 
     fn sqrt(self) -> Self::Output {
-        Area(Sqrt::sqrt(self.0))
+        Area(self.0.sqrt())
     }
 }
 

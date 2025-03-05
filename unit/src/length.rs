@@ -5,7 +5,7 @@ use std::{
 };
 use villagekit_number::{
     num,
-    traits::{Abs, ApproxEq, One, Real, Sqrt, Zero},
+    traits::{Abs, ApproxEq, One, Sqrt, Zero},
     Number,
 };
 
@@ -101,7 +101,7 @@ impl Sqrt for Length {
     type Output = Number;
 
     fn sqrt(self) -> Self::Output {
-        Sqrt::sqrt(self.0)
+        self.0.sqrt()
     }
 }
 

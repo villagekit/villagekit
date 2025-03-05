@@ -1,48 +1,17 @@
+pub mod macros;
 pub mod traits;
-
-use std::fmt::{Debug, Display};
 
 use fastnum::{
     decimal::{Context, Decimal, ParseError},
     D128,
 };
-use num_derive::{
-    FromPrimitive, Neg, Num, NumCast, NumOps, One as OneDerive, Real, ToPrimitive,
-    Zero as ZeroDerive,
-};
-pub use num_traits::real::Real;
 use serde::{Deserialize, Serialize};
-use traits::{ApproxEq, One, Sqrt, Zero};
+use std::fmt::{Debug, Display};
 
-#[derive(
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    ZeroDerive,
-    OneDerive,
-    NumOps,
-    Num,
-    ToPrimitive,
-    FromPrimitive,
-    NumCast,
-    Neg,
-    Real,
-)]
+pub use crate::traits::*;
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Number(pub D128);
-
-#[macro_export]
-macro_rules! num {
-    ($($ body:tt)*) => {{
-        const __NUMBER: Number = Number::parse_unchecked(concat!($(stringify!($ body)),*));
-        __NUMBER
-    }}
-}
 
 impl Number {
     const CONTEXT: Context = Context::default();
@@ -100,21 +69,43 @@ impl Default for Number {
     }
 }
 
-impl Sqrt for Number {
-    type Output = Number;
+impl Add for Number {
+    type Output = Self;
 
-    fn sqrt(self) -> Self::Output {
-        <Self as Real>::sqrt(self)
+    fn add(self, rhs: Self) -> Self::Output {
+        Self(self.0.add(rhs.0))
     }
 }
 
-impl ApproxEq for Number {
-    fn approx_eq(&self, rhs: &Number) -> bool {
-        if self == rhs {
-            return true;
-        }
+impl Sub for Number {
+    type Output = Self;
 
-        (*self - *rhs).abs() <= Number::EPSILON
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self(self.0.sub(rhs.0))
+    }
+}
+
+impl Mul for Number {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self(self.0.mul(rhs.0))
+    }
+}
+
+impl Div for Number {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        Self(self.0.div(rhs.0))
+    }
+}
+
+impl Neg for Number {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self(self.0.neg())
     }
 }
 
@@ -127,6 +118,73 @@ impl Zero for Number {
 impl One for Number {
     fn one() -> Self {
         Self::ONE
+    }
+}
+
+impl Sqrt for Number {
+    type Output = Self;
+
+    fn sqrt(self) -> Self::Output {
+        Self(self.0.sqrt())
+    }
+}
+
+impl Abs for Number {
+    type Output = Self;
+
+    fn abs(self) -> Self::Output {
+        Self(self.0.abs())
+    }
+}
+
+impl Trig for Number {
+    type Output = Self;
+
+    fn hypot(&self, other: Self) -> Self::Output {
+        Self(self.0.hypot(other.0))
+    }
+
+    fn sin(&self) -> Self::Output {
+        Self(self.0.sin())
+    }
+
+    fn cos(&self) -> Self::Output {
+        Self(self.0.cos())
+    }
+
+    fn tan(&self) -> Self::Output {
+        Self(self.0.tan())
+    }
+
+    fn asin(&self) -> Self::Output {
+        Self(self.0.asin())
+    }
+
+    fn acos(&self) -> Self::Output {
+        Self(self.0.acos())
+    }
+
+    fn atan(&self) -> Self::Output {
+        Self(self.0.atan())
+    }
+
+    fn atan2(&self, other: Self) -> Self::Output {
+        Self(self.0.atan2(other.0))
+    }
+
+    fn sin_cos(&self) -> (Self::Output, Self::Output) {
+        let (s, c) = self.0.sin_cos();
+        (Self(s), Self(c))
+    }
+}
+
+impl ApproxEq for Number {
+    fn approx_eq(&self, rhs: &Number) -> bool {
+        if self == rhs {
+            return true;
+        }
+
+        (*self - *rhs).abs() <= Number::EPSILON
     }
 }
 

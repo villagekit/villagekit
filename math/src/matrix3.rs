@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::quaternion::Quaternion;
 use crate::vector3::Vector3;
-use villagekit_number::{self as number, num, Number, Real};
+use villagekit_number::{self as number, num, traits::Abs, Number};
 
 /// A 3×3 matrix represented by three basis vectors (columns).
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]

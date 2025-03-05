@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::ops::Mul;
-use villagekit_number::{num, traits::ApproxEq, Number, Real};
+use villagekit_number::{
+    num,
+    traits::{ApproxEq, Sqrt, Trig},
+    Number,
+};
 
 use crate::vector3::Vector3;
 
