@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
-use std::ops::{self, Mul};
+use std::ops::Mul;
 use villagekit_number::{num, Number, Real};
 
 use crate::vector3::Vector3;
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Quaternion {
     pub x: Number,
     pub y: Number,
@@ -17,26 +17,52 @@ impl Quaternion {
         Self { x, y, z, w }
     }
     pub fn from_axis_angle(axis: Vector3<Number>, angle: Number) -> Self {
-        let Vector3 { x, y, z } = axis;
-        let half_angle = angle / num!(2);
-        let s = half_angle.sin();
-        let w = s.cos();
-        Self { x, y, z, w }
+        let axis = axis.normalize();
+        let s = (num!(0.5) * angle).sin();
+        Self {
+            x: axis.x * s,
+            y: axis.y * s,
+            z: axis.z * s,
+            w: s.cos(),
+        }
     }
+
     pub fn multiply(self, other: Quaternion) -> Self {
-        let (a, b) = (self, other);
-        let x = a.x * b.w + a.w * b.x + a.y * b.z - a.z * b.y;
-        let y = a.y * b.w + a.w * b.y + a.z * b.x - a.x * b.z;
-        let z = a.z * b.w + a.w * b.z + a.x * b.y - a.y * b.x;
-        let w = a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z;
+        // from https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+        let (q1, q2) = (self, other);
+        let x = q1.x * q2.w + q1.y * q2.z - q1.z * q2.y + q1.w * q2.x;
+        let y = -q1.x * q2.z + q1.y * q2.w + q1.z * q2.x + q1.w * q2.y;
+        let z = q1.x * q2.y - q1.y * q2.x + q1.z * q2.w + q1.w * q2.z;
+        let w = -q1.x * q2.x - q1.y * q2.y - q1.z * q2.z + q1.w * q2.w;
         Self { x, y, z, w }
     }
+
     pub fn premultiply(self, other: Quaternion) -> Self {
         other.multiply(self)
     }
+
     pub fn multipy_scalar(self, n: Number) -> Self {
         let Self { x, y, z, w } = self;
         Quaternion::new(x * n, y * n, z * n, w * n)
+    }
+
+    pub fn length(self) -> Number {
+        let Self { x, y, z, w } = self;
+        (x * x + y * y + z * z + w * w).sqrt()
+    }
+
+    pub fn normalize(self) -> Self {
+        let length = self.length();
+        if length == Number::ZERO {
+            Self::default()
+        } else {
+            Self {
+                x: self.x / length,
+                y: self.y / length,
+                z: self.z / length,
+                w: self.w / length,
+            }
+        }
     }
 }
 

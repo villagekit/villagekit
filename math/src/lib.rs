@@ -18,10 +18,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn magnitude_of_vector_with_units() {
+    fn length_of_vector_with_units() {
         let expected = Length(num!(10) * num!(3).sqrt());
         let v = Vector3::new(Length(num!(10)), Length(num!(10)), Length(num!(10)));
-        let actual = v.magnitude();
+        let actual = v.length();
         assert_eq!(expected, actual);
     }
 }

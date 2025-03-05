@@ -48,12 +48,42 @@ macro_rules! num {
 impl Number {
     const CONTEXT: Context = Context::default();
 
+    pub const ZERO: Number = Number(Decimal::ZERO);
+    pub const ONE: Number = Number(Decimal::ONE);
+    pub const TWO: Number = Number(Decimal::TWO);
+
+    pub const HALF: Number = num!(0.5);
+    pub const QUARTER: Number = num!(0.25);
+
+    pub const PI: Number = Number(Decimal::PI);
+    pub const FRAC_1_PI: Number = Number(Decimal::FRAC_1_PI);
+    pub const FRAC_2_PI: Number = Number(Decimal::FRAC_2_PI);
+    pub const FRAC_PI_2: Number = Number(Decimal::FRAC_PI_2);
+    pub const FRAC_PI_3: Number = Number(Decimal::FRAC_PI_3);
+    pub const FRAC_PI_4: Number = Number(Decimal::FRAC_PI_4);
+
     pub fn parse(s: &str) -> Result<Self, ParseError> {
         Ok(Self(Decimal::from_str(s, Self::CONTEXT)?))
     }
 
     pub const fn parse_unchecked(s: &str) -> Self {
         Self(Decimal::parse_str(s, Self::CONTEXT))
+    }
+
+    pub const fn add(self, rhs: Number) -> Self {
+        Self(self.0.add(rhs.0))
+    }
+
+    pub const fn sub(self, rhs: Number) -> Self {
+        Self(self.0.sub(rhs.0))
+    }
+
+    pub const fn mul(self, rhs: Number) -> Self {
+        Self(self.0.mul(rhs.0))
+    }
+
+    pub const fn div(self, rhs: Number) -> Self {
+        Self(self.0.div(rhs.0))
     }
 }
 
@@ -65,7 +95,7 @@ impl From<Number> for f32 {
 
 impl Default for Number {
     fn default() -> Self {
-        num!(0)
+        Self::ZERO
     }
 }
 
@@ -79,13 +109,13 @@ impl Sqrt for Number {
 
 impl Zero for Number {
     fn zero() -> Self {
-        num!(0)
+        Self::ZERO
     }
 }
 
 impl One for Number {
     fn one() -> Self {
-        num!(1)
+        Self::ONE
     }
 }
 

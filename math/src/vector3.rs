@@ -5,11 +5,11 @@ use std::{
 };
 use villagekit_number::{
     num,
-    traits::{One, Sqrt},
+    traits::{One, Sqrt, Zero},
     Number,
 };
 
-use crate::Matrix3;
+use crate::{Matrix3, Quaternion};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize)]
 pub struct Vector3<N> {
@@ -85,10 +85,87 @@ where
 
 impl<N> Vector3<N>
 where
+    N: Div<Number, Output = N>,
+{
+    pub fn divide_scalar(self, n: Number) -> Self {
+        Self::new(self.x / n, self.y / n, self.z / n)
+    }
+}
+
+impl<N> Div<Number> for Vector3<N>
+where
+    N: Div<Number, Output = N>,
+{
+    type Output = Self;
+
+    fn div(self, rhs: Number) -> Self::Output {
+        self.divide_scalar(rhs)
+    }
+}
+
+impl<N> Div<Vector3<N>> for Number
+where
+    N: Div<Number, Output = N>,
+{
+    type Output = Vector3<N>;
+
+    fn div(self, rhs: Vector3<N>) -> Self::Output {
+        rhs.divide_scalar(self)
+    }
+}
+
+impl<N> Vector3<N>
+where
+    N: Copy,
+    // qxyz.cross(...)
+    Number: Mul<N, Output = N>,
+    N: Sub<N, Output = N>,
+    // num!(2) * qxyz.cross(self)
+    // q.w * t
+    Number: Mul<Self, Output = Self>,
+    // self + (...)
+    Self: Add<Self, Output = Self>,
+{
+    pub fn multiply_quaternion(self, q: Quaternion) -> Self {
+        let q = q.normalize();
+        let q_xyz = Vector3::new(q.x, q.y, q.z);
+        let t = Number::TWO * q_xyz.cross(&self);
+        self + q.w * t + q_xyz.cross(&t)
+    }
+}
+
+impl<N> Mul<Quaternion> for Vector3<N>
+where
+    N: Copy + Sub<N, Output = N>,
+    Number: Mul<N, Output = N> + Mul<Self, Output = Self>,
+    Self: Add<Self, Output = Self>,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: Quaternion) -> Self::Output {
+        self.multiply_quaternion(rhs)
+    }
+}
+
+impl<N> Mul<Vector3<N>> for Quaternion
+where
+    N: Copy + Sub<N, Output = N>,
+    Number: Mul<N, Output = N> + Mul<Vector3<N>, Output = Vector3<N>>,
+    Vector3<N>: Add<Vector3<N>, Output = Vector3<N>>,
+{
+    type Output = Vector3<N>;
+
+    fn mul(self, rhs: Vector3<N>) -> Self::Output {
+        rhs.multiply_quaternion(self)
+    }
+}
+
+impl<N> Vector3<N>
+where
     N: Copy + Add<Output = N> + Mul,
     <N as Mul>::Output: Add<Output = <N as Mul>::Output> + Sqrt<Output = N>,
 {
-    pub fn magnitude(self) -> N {
+    pub fn length(self) -> N {
         let Self { x, y, z } = self;
         (x * x + y * y + z * z).sqrt()
     }
@@ -97,21 +174,20 @@ where
 impl<N> Vector3<N>
 where
     N: Copy,
-    // self.magnitude()
+    // self.length()
     N: Add<Output = N> + Mul,
     <N as Mul>::Output: Add<Output = <N as Mul>::Output> + Sqrt<Output = N>,
     // (...) / N::one()
     N: One + Div<N, Output = Number>,
-    // (...) / magnitude
+    // (...) / length
     N: Div<Number, Output = N>,
 {
     pub fn normalize(self) -> Self {
-        let magnitude = self.magnitude() / N::one();
-        // TODO check for division by zero?
-        Self {
-            x: self.x / magnitude,
-            y: self.y / magnitude,
-            z: self.z / magnitude,
+        let length = self.length() / N::one();
+        if length == Number::ZERO {
+            self
+        } else {
+            self / length
         }
     }
 }
@@ -127,12 +203,13 @@ impl<A> Vector3<A> {
     }
 }
 
-impl<N> Vector3<N>
-where
-    N: Copy + Mul,
-    <N as Mul>::Output: Sub<Output = <N as Mul>::Output>,
-{
-    pub fn cross(&self, other: &Self) -> Vector3<<N as Mul>::Output> {
+impl<A> Vector3<A> {
+    pub fn cross<B>(&self, other: &Vector3<B>) -> Vector3<<A as Mul<B>>::Output>
+    where
+        B: Copy,
+        A: Copy + Mul<B>,
+        <A as Mul<B>>::Output: Sub<Output = <A as Mul<B>>::Output>,
+    {
         Vector3::new(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,

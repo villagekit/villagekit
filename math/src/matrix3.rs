@@ -217,10 +217,10 @@ impl Matrix3 {
     /// 5) Convert that to a `Quaternion`.
     /// 6) Return (translation, quaternion, scale).
     pub fn to_rotation_scale(&self) -> (Quaternion, Vector3<Number>) {
-        // Step 1: measure the scale = magnitude of each column
-        let sx = self.x_axis.magnitude();
-        let sy = self.y_axis.magnitude();
-        let sz = self.z_axis.magnitude();
+        // Step 1: measure the scale = length of each column
+        let sx = self.x_axis.length();
+        let sy = self.y_axis.length();
+        let sz = self.z_axis.length();
 
         // Step 2: if determinant is negative, invert one axis's sign
         let det = self.determinant();

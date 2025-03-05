@@ -75,25 +75,6 @@ impl Product {
         self.update_transform(|t| t.rotate(axis, angle, origin))
     }
 
-    pub fn change_basis(self, basis: Matrix3) -> Self {
-        self.update_transform(|t| t.change_basis(basis))
-    }
-
-    pub fn mirror_x(self) -> Self {
-        let scale = Vector3::new(num!(-1), num!(1), num!(1));
-        self.update_transform(|t| t.scale(scale))
-    }
-
-    pub fn mirror_y(self) -> Self {
-        let scale = Vector3::new(num!(1), num!(-1), num!(1));
-        self.update_transform(|t| t.scale(scale))
-    }
-
-    pub fn mirror_z(self) -> Self {
-        let scale = Vector3::new(num!(1), num!(1), num!(-1));
-        self.update_transform(|t| t.scale(scale))
-    }
-
     fn update_transform(self, updater: impl Fn(Transform) -> Transform) -> Self {
         Self {
             transform: updater(self.transform),

@@ -18,20 +18,20 @@ impl Assembly for BundleOfSticks {
     fn products(&self) -> Vec<Product> {
         vec![
             Beam::x(
-                (Length(num!(0)), Length(num!(10))),
+                (Length(num!(2)), Length(num!(-10))),
                 Length(num!(0)),
                 Length(num!(0)),
             ),
             Beam::y(
                 Length(num!(0)),
-                (Length(num!(0)), Length(num!(10))),
+                (Length(num!(2)), Length(num!(10))),
                 Length(num!(0)),
             )
             .translate(Length(num!(1)), Length(num!(0)), Length(num!(1))),
             Beam::z(
                 Length(num!(0)),
                 Length(num!(0)),
-                (Length(num!(0)), Length(num!(10))),
+                (Length(num!(2)), Length(num!(10))),
             )
             .translate(Length(num!(1)), Length(num!(1)), Length(num!(0))),
         ]
@@ -51,7 +51,7 @@ impl Beam {
         let mut beam = Self { length }.place();
 
         if x.0 > x.1 {
-            beam = beam.mirror_x()
+            beam = beam.rotate(Y_AXIS, HALF_ROTATION, None)
         }
 
         beam.translate(x.0, y, z)
@@ -62,14 +62,10 @@ impl Beam {
 
         let mut beam = Self { length }.place();
 
-        beam = beam.change_basis(Matrix3 {
-            x_axis: Y_AXIS,
-            y_axis: X_AXIS,
-            z_axis: Z_AXIS,
-        });
+        beam = beam.rotate(Z_AXIS, QUARTER_ROTATION, None);
 
         if y.0 > y.1 {
-            beam = beam.mirror_y()
+            beam = beam.rotate(X_AXIS, HALF_ROTATION, None)
         }
 
         beam.translate(x, y.0, z)
@@ -80,14 +76,10 @@ impl Beam {
 
         let mut beam = Self { length }.place();
 
-        beam = beam.change_basis(Matrix3 {
-            x_axis: Z_AXIS,
-            y_axis: Y_AXIS,
-            z_axis: X_AXIS,
-        });
+        beam = beam.rotate(Y_AXIS, -QUARTER_ROTATION, None);
 
         if z.0 > z.1 {
-            beam = beam.mirror_z()
+            beam = beam.rotate(X_AXIS, HALF_ROTATION, None)
         }
 
         beam.translate(x, y, z.0)
