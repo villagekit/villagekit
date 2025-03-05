@@ -16,14 +16,22 @@ pub(crate) fn setup_sandbox(mut commands: Commands) {
     ));
     */
 
-    // light
-    commands.spawn((
-        PointLight {
-            shadows_enabled: true,
-            ..default()
-        },
-        Transform::from_xyz(4.0, 4.0, 12.0),
-    ));
+    // lights
+    let num_lights = 6;
+    for _light_index in 0..num_lights {
+        commands.spawn((
+            PointLight {
+                shadows_enabled: true,
+                range: 100_f32,
+                ..default()
+            },
+            Transform::from_xyz(
+                rand::random_range(-20_f32..20_f32),
+                rand::random_range(20_f32..30_f32),
+                rand::random_range(-20_f32..20_f32),
+            ),
+        ));
+    }
 
     // camera
     commands.spawn((
