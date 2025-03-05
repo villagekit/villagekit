@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use bevy::prelude::*;
 
 use villagekit_engine::{traits::*, Transform, *};
@@ -12,28 +10,57 @@ fn main() {
 }
 
 #[derive(Clone)]
-struct BundleOfSticks {}
+struct Chair {
+    width: Length,
+    depth: Length,
+    height: Length,
+}
 
-impl Assembly for BundleOfSticks {
+impl Assembly for Chair {
     fn products(&self) -> Vec<Product> {
+        let Self {
+            width,
+            depth,
+            height,
+        } = *self;
+
         vec![
-            Beam::x(
-                (Length(num!(2)), Length(num!(-10))),
+            Beam::z(Length(num!(0)), Length(num!(0)), (Length(num!(0)), height)),
+            Beam::z(
+                width - Length(num!(1)),
                 Length(num!(0)),
-                Length(num!(0)),
+                (Length(num!(0)), height),
             ),
-            Beam::y(
-                Length(num!(0)),
-                (Length(num!(2)), Length(num!(10))),
-                Length(num!(0)),
-            )
-            .translate(Length(num!(1)), Length(num!(0)), Length(num!(1))),
             Beam::z(
                 Length(num!(0)),
-                Length(num!(0)),
-                (Length(num!(2)), Length(num!(10))),
-            )
-            .translate(Length(num!(1)), Length(num!(1)), Length(num!(0))),
+                depth - Length(num!(1)),
+                (Length(num!(0)), height),
+            ),
+            Beam::z(
+                width - Length(num!(1)),
+                depth - Length(num!(1)),
+                (Length(num!(0)), height),
+            ),
+            Beam::x(
+                (Length(num!(0)), width),
+                Length(num!(1)),
+                height - Length(num!(2)),
+            ),
+            Beam::x(
+                (Length(num!(0)), width),
+                depth - Length(num!(2)),
+                height - Length(num!(2)),
+            ),
+            Beam::y(
+                Length(num!(1)),
+                (Length(num!(0)), depth),
+                height - Length(num!(1)),
+            ),
+            Beam::y(
+                width - Length(num!(2)),
+                (Length(num!(0)), depth),
+                height - Length(num!(1)),
+            ),
         ]
     }
 }
@@ -100,10 +127,10 @@ impl Stock for Beam {
                 },
             )
             .insert_material(
-                "red".into(),
+                "green".into(),
                 RenderableMaterial::Color {
                     color: RenderableColor::Hsla {
-                        hue: num!(0),
+                        hue: num!(120),
                         saturation: num!(1),
                         lightness: num!(0.5),
                         alpha: num!(1),
@@ -112,7 +139,7 @@ impl Stock for Beam {
             )
             .insert_instance(RenderableInstance {
                 mesh: Some("cube".into()),
-                material: Some("red".into()),
+                material: Some("green".into()),
                 transform: Some(Transform::default().translate(
                     num!(0.5) * (self.length - grid_unit),
                     Length::zero(),
@@ -124,6 +151,10 @@ impl Stock for Beam {
 }
 
 fn setup_model(mut commands: Commands, sandbox: Query<Entity, With<Sandbox>>) {
-    let test = BundleOfSticks {};
+    let test = Chair {
+        width: Length(num!(10)),
+        depth: Length(num!(10)),
+        height: Length(num!(10)),
+    };
     spawn_product(sandbox.single(), test.place(), &mut commands);
 }
