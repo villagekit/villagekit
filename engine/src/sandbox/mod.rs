@@ -6,17 +6,15 @@ use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridSettings};
 #[require(Transform, Visibility)]
 pub struct Sandbox;
 
-pub(crate) fn setup_sandbox(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+pub(crate) fn setup_sandbox(mut commands: Commands) {
+    /*
     // circular base
     commands.spawn((
         Mesh3d(meshes.add(Circle::new(4.0))),
         MeshMaterial3d(materials.add(Color::WHITE)),
         Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
     ));
+    */
 
     // light
     commands.spawn((

@@ -27,7 +27,13 @@ impl Assembly for BundleOfSticks {
                 (Length(num!(0)), Length(num!(10))),
                 Length(num!(0)),
             )
-            .translate(Length(num!(5)), Length(num!(0)), Length(num!(0))),
+            .translate(Length(num!(1)), Length(num!(0)), Length(num!(1))),
+            Beam::z(
+                Length(num!(0)),
+                Length(num!(0)),
+                (Length(num!(0)), Length(num!(10))),
+            )
+            .translate(Length(num!(1)), Length(num!(1)), Length(num!(0))),
         ]
     }
 }
@@ -56,13 +62,10 @@ impl Beam {
 
         let mut beam = Self { length }.place();
 
-        let x_axis = Vector3::new(num!(1), num!(0), num!(0));
-        let y_axis = Vector3::new(num!(0), num!(1), num!(0));
-        let z_axis = Vector3::new(num!(0), num!(0), num!(1));
         beam = beam.change_basis(Matrix3 {
-            x_axis: y_axis,
-            y_axis: x_axis,
-            z_axis,
+            x_axis: Y_AXIS,
+            y_axis: X_AXIS,
+            z_axis: Z_AXIS,
         });
 
         if y.0 > y.1 {
@@ -71,17 +74,37 @@ impl Beam {
 
         beam.translate(x, y.0, z)
     }
+
+    fn z(x: Length, y: Length, z: (Length, Length)) -> Product {
+        let length = (z.0 - z.1).abs();
+
+        let mut beam = Self { length }.place();
+
+        beam = beam.change_basis(Matrix3 {
+            x_axis: Z_AXIS,
+            y_axis: Y_AXIS,
+            z_axis: X_AXIS,
+        });
+
+        if z.0 > z.1 {
+            beam = beam.mirror_z()
+        }
+
+        beam.translate(x, y, z.0)
+    }
 }
 
 impl Stock for Beam {
     fn render(&self) -> Renderable {
+        let grid_unit: Length = Meter(num!(1)).into();
+
         Renderable::default()
             .insert_mesh(
                 "cube".into(),
                 RenderableMesh::Cuboid {
-                    x_length: Meter(num!(1)).into(),
-                    y_length: Meter(num!(1)).into(),
-                    z_length: Meter(num!(10)).into(),
+                    x_length: self.length,
+                    y_length: grid_unit,
+                    z_length: grid_unit,
                 },
             )
             .insert_material(
@@ -98,7 +121,11 @@ impl Stock for Beam {
             .insert_instance(RenderableInstance {
                 mesh: Some("cube".into()),
                 material: Some("red".into()),
-                transform: Some(Transform::default()),
+                transform: Some(Transform::default().translate(
+                    num!(0.5) * (self.length - grid_unit),
+                    Length::zero(),
+                    Length::zero(),
+                )),
                 children: Some(vec![]),
             })
     }

@@ -1,9 +1,11 @@
 mod affine3;
+mod constants;
 mod matrix3;
 mod quaternion;
 mod vector3;
 
 pub use affine3::*;
+pub use constants::*;
 pub use matrix3::*;
 pub use quaternion::*;
 pub use vector3::*;

@@ -5,7 +5,7 @@ use std::{
 };
 use villagekit_number::{
     num,
-    traits::{One, Sqrt, Zero},
+    traits::{One, Sqrt},
     Number,
 };
 
@@ -19,7 +19,7 @@ pub struct Vector3<N> {
 }
 
 impl<N> Vector3<N> {
-    pub fn new(x: N, y: N, z: N) -> Self {
+    pub const fn new(x: N, y: N, z: N) -> Self {
         Self { x, y, z }
     }
 }

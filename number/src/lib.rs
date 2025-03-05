@@ -40,10 +40,8 @@ pub struct Number(pub D256);
 #[macro_export]
 macro_rules! num {
     ($($ body:tt)*) => {{
-        match Number::parse(concat!($(stringify!($ body)),*)) {
-            Ok(n) => n,
-            Err(e) => { panic!("{}", e) },
-        }
+        const __NUMBER: Number = Number::parse_unchecked(concat!($(stringify!($ body)),*));
+        __NUMBER
     }}
 }
 
@@ -51,8 +49,11 @@ impl Number {
     const CONTEXT: Context = Context::default();
 
     pub fn parse(s: &str) -> Result<Self, ParseError> {
-        let d: D256 = Decimal::from_str(s, Self::CONTEXT)?;
-        Ok(Self(d))
+        Ok(Self(Decimal::from_str(s, Self::CONTEXT)?))
+    }
+
+    pub const fn parse_unchecked(s: &str) -> Self {
+        Self(Decimal::parse_str(s, Self::CONTEXT))
     }
 }
 
