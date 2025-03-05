@@ -18,12 +18,13 @@ impl Quaternion {
     }
     pub fn from_axis_angle(axis: Vector3<Number>, angle: Number) -> Self {
         let axis = axis.normalize();
-        let s = (num!(0.5) * angle).sin();
+        let half_angle = Number::HALF * angle;
+        let s = half_angle.sin();
         Self {
             x: axis.x * s,
             y: axis.y * s,
             z: axis.z * s,
-            w: s.cos(),
+            w: half_angle.cos(),
         }
     }
 

@@ -1,6 +1,6 @@
 pub mod traits;
 
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
 use fastnum::{
     decimal::{Context, Decimal, ParseError},
@@ -15,7 +15,6 @@ use serde::{Deserialize, Serialize};
 use traits::{One, Sqrt, Zero};
 
 #[derive(
-    Debug,
     Copy,
     Clone,
     PartialEq,
@@ -119,9 +118,15 @@ impl One for Number {
     }
 }
 
+impl Debug for Number {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
+
 impl Display for Number {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        Display::fmt(&self.0, f)
     }
 }
 
