@@ -4,7 +4,7 @@ use std::fmt::{Debug, Display};
 
 use fastnum::{
     decimal::{Context, Decimal, ParseError},
-    D256,
+    D128,
 };
 use num_derive::{
     FromPrimitive, Neg, Num, NumCast, NumOps, One as OneDerive, Real, ToPrimitive,
@@ -12,7 +12,7 @@ use num_derive::{
 };
 pub use num_traits::real::Real;
 use serde::{Deserialize, Serialize};
-use traits::{One, Sqrt, Zero};
+use traits::{ApproxEq, One, Sqrt, Zero};
 
 #[derive(
     Copy,
@@ -34,7 +34,7 @@ use traits::{One, Sqrt, Zero};
     Neg,
     Real,
 )]
-pub struct Number(pub D256);
+pub struct Number(pub D128);
 
 #[macro_export]
 macro_rules! num {
@@ -60,6 +60,8 @@ impl Number {
     pub const FRAC_PI_2: Number = Number(Decimal::FRAC_PI_2);
     pub const FRAC_PI_3: Number = Number(Decimal::FRAC_PI_3);
     pub const FRAC_PI_4: Number = Number(Decimal::FRAC_PI_4);
+
+    pub const EPSILON: Number = Number(Decimal::EPSILON);
 
     pub fn parse(s: &str) -> Result<Self, ParseError> {
         Ok(Self(Decimal::from_str(s, Self::CONTEXT)?))
@@ -103,6 +105,16 @@ impl Sqrt for Number {
 
     fn sqrt(self) -> Self::Output {
         <Self as Real>::sqrt(self)
+    }
+}
+
+impl ApproxEq for Number {
+    fn approx_eq(&self, rhs: &Number) -> bool {
+        if self == rhs {
+            return true;
+        }
+
+        (*self - *rhs).abs() <= Number::EPSILON
     }
 }
 

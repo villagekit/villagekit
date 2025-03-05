@@ -5,7 +5,7 @@ use std::{
 };
 use villagekit_number::{
     num,
-    traits::{One, Sqrt, Zero},
+    traits::{ApproxEq, One, Sqrt, Zero},
     Number,
 };
 
@@ -157,6 +157,15 @@ where
 
     fn mul(self, rhs: Vector3<N>) -> Self::Output {
         rhs.multiply_quaternion(self)
+    }
+}
+
+impl<N> ApproxEq for Vector3<N>
+where
+    N: ApproxEq,
+{
+    fn approx_eq(&self, rhs: &Self) -> bool {
+        self.x.approx_eq(&rhs.x) && self.y.approx_eq(&rhs.y) && self.z.approx_eq(&rhs.z)
     }
 }
 

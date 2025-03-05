@@ -1,7 +1,7 @@
 use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
 use villagekit_math::{Quaternion, Vector3};
-use villagekit_number::Number;
+use villagekit_number::{traits::ApproxEq, Number};
 use villagekit_unit::Length;
 
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
@@ -113,6 +113,24 @@ mod tests {
         assert_eq!(result.translation, initial.translation);
     }
 
+    macro_rules! assert_approx_eq {
+        ($given:expr, $expected:expr) => {
+            assert!(
+                ApproxEq::approx_eq($given, $expected),
+                "assert_approx_eq!({}, {})
+
+    left  = {:?}
+    right = {:?}
+
+",
+                stringify!($given),
+                stringify!($expected),
+                $given,
+                $expected
+            )
+        };
+    }
+
     #[test]
     fn test_rotate_without_origin() {
         // Rotate a point at (1,0,0) 90° about the z-axis using default origin (0,0,0).
@@ -124,9 +142,9 @@ mod tests {
         let angle = Number::FRAC_PI_2;
         let result = initial.rotate(axis, angle, None);
         // (1,0,0) rotated about (0,0,0) by 90° should become (0,1,0)
-        assert_eq!(
-            result.translation,
-            Vector3::new(Length(num!(0)), Length(num!(1)), Length(num!(0)))
+        assert_approx_eq!(
+            &result.translation,
+            &Vector3::new(Length(num!(0)), Length(num!(1)), Length(num!(0)))
         );
     }
 
@@ -143,9 +161,9 @@ mod tests {
         let result = initial.rotate(axis, angle, Some(origin));
         // Calculation:
         // (2,0,0) - (1,0,0) = (1,0,0) rotated 90° gives (0,1,0), then add origin -> (1,1,0)
-        assert_eq!(
-            result.translation,
-            Vector3::new(Length(num!(1)), Length(num!(1)), Length(num!(0)))
+        assert_approx_eq!(
+            &result.translation,
+            &Vector3::new(Length(num!(1)), Length(num!(1)), Length(num!(0)))
         );
     }
 }

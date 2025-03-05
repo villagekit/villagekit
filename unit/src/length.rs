@@ -5,7 +5,7 @@ use std::{
 };
 use villagekit_number::{
     num,
-    traits::{Abs, One, Real, Sqrt, Zero},
+    traits::{Abs, ApproxEq, One, Real, Sqrt, Zero},
     Number,
 };
 
@@ -110,6 +110,12 @@ impl Abs for Length {
 
     fn abs(self) -> Self::Output {
         Self(self.0.abs())
+    }
+}
+
+impl ApproxEq for Length {
+    fn approx_eq(&self, rhs: &Self) -> bool {
+        self.0.approx_eq(&rhs.0)
     }
 }
 

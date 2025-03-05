@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::ops::Mul;
-use villagekit_number::{num, Number, Real};
+use villagekit_number::{num, traits::ApproxEq, Number, Real};
 
 use crate::vector3::Vector3;
 
@@ -83,6 +83,15 @@ impl Mul for Quaternion {
 
     fn mul(self, rhs: Self) -> Self::Output {
         self.multiply(rhs)
+    }
+}
+
+impl ApproxEq for Quaternion {
+    fn approx_eq(&self, rhs: &Self) -> bool {
+        self.x.approx_eq(&rhs.x)
+            && self.y.approx_eq(&rhs.y)
+            && self.z.approx_eq(&rhs.z)
+            && self.w.approx_eq(&rhs.w)
     }
 }
 

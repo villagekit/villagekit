@@ -20,3 +20,7 @@ pub trait Abs {
 
     fn abs(self) -> Self::Output;
 }
+
+pub trait ApproxEq {
+    fn approx_eq(&self, rhs: &Self) -> bool;
+}
