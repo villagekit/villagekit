@@ -1,7 +1,7 @@
 use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
 use villagekit_math::{Quaternion, Vector3};
-use villagekit_number::{traits::ApproxEq, Number};
+use villagekit_number::Number;
 use villagekit_unit::Length;
 
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
@@ -61,7 +61,7 @@ impl From<Transform> for BevyTransform {
 }
 #[cfg(test)]
 mod tests {
-    use villagekit_number::num;
+    use villagekit_number::{num, traits::ApproxEq};
 
     use super::*;
 

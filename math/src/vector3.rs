@@ -4,12 +4,11 @@ use std::{
     ops::{Add, Div, Mul, Sub},
 };
 use villagekit_number::{
-    num,
-    traits::{ApproxEq, One, Sqrt, Zero},
+    traits::{ApproxEq, One, Sqrt},
     Number,
 };
 
-use crate::{Matrix3, Quaternion};
+use crate::Quaternion;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize)]
 pub struct Vector3<N> {
@@ -224,78 +223,6 @@ impl<A> Vector3<A> {
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
         )
-    }
-}
-
-impl Vector3<Number> {
-    pub fn outer(&self, other: &Vector3<Number>) -> Matrix3 {
-        Matrix3::from_cols(
-            self.multiply_scalar(other.x),
-            self.multiply_scalar(other.y),
-            self.multiply_scalar(other.z),
-        )
-    }
-}
-
-impl<N> Vector3<N>
-where
-    N: Copy + Mul<Number, Output = N> + Add<N, Output = N>,
-{
-    pub fn apply_matrix3(&self, m: &Matrix3) -> Vector3<N> {
-        let x = self.dot(&m.x_axis);
-        let y = self.dot(&m.y_axis);
-        let z = self.dot(&m.z_axis);
-        Vector3 { x, y, z }
-    }
-}
-
-impl<N> Mul<Matrix3> for Vector3<N>
-where
-    N: Copy + Mul<Number, Output = N> + Add<N, Output = N>,
-{
-    type Output = Vector3<N>;
-
-    fn mul(self, rhs: Matrix3) -> Self::Output {
-        self.apply_matrix3(&rhs)
-    }
-}
-
-impl<N> Mul<Vector3<N>> for Matrix3
-where
-    N: Copy + Mul<Number, Output = N> + Add<N, Output = N>,
-{
-    type Output = Vector3<N>;
-
-    fn mul(self, rhs: Vector3<N>) -> Self::Output {
-        rhs.apply_matrix3(&self)
-    }
-}
-
-impl<N> Vector3<N>
-where
-    N: Copy + Mul<Number, Output = N> + Add<N, Output = N>,
-{
-    pub fn remap(self, basis: Matrix3) -> Self {
-        basis.transpose() * self
-    }
-}
-
-// https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-// Note: Vector must be normalized
-impl<N> Vector3<N>
-where
-    N: Copy,
-    // self.dot(&axis)
-    N: Mul<Number, Output = N> + Add<Output = N>,
-    // self - (...)
-    Self: Sub<Output = Self>,
-    // num!(2) * (...)
-    Number: Mul<N, Output = N>,
-    // (...) * axis
-    N: Mul<Vector3<Number>, Output = Self>,
-{
-    pub fn reflect(self, normal: Vector3<Number>) -> Self {
-        self - num!(2) * self.dot(&normal) * normal
     }
 }
 

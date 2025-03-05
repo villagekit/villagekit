@@ -1,6 +1,6 @@
 use dyn_clone::DynClone;
-use villagekit_math::{Matrix3, Vector3};
-use villagekit_number::{num, Number};
+use villagekit_math::Vector3;
+use villagekit_number::Number;
 use villagekit_render::{Renderable, Transform};
 use villagekit_unit::Length;
 
@@ -85,7 +85,7 @@ impl Product {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 
     #[test]
     fn it_works() {
