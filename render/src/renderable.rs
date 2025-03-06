@@ -97,14 +97,9 @@ pub enum RenderableMaterial {
 
 impl RenderableMaterial {
     fn material(&self) -> StandardMaterial {
-        let mut m = match self {
+        match self {
             RenderableMaterial::Color { color } => StandardMaterial::from_color(color.clone()),
-        };
-        // https://docs.rs/bevy/latest/bevy/pbr/struct.StandardMaterial.html#structfield.cull_mode
-        // Don't cull either side of the mesh, so negative scales are automatically supported.
-        // (TODO handle this like https://github.com/bevyengine/bevy/pull/8859 )
-        m.cull_mode = None;
-        m
+        }
     }
 }
 
