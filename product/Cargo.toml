@@ -4,6 +4,8 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+villagekit-math = { path = "../math" }
+villagekit-number = { path = "../number" }
 villagekit-render = { path = "../render" }
 villagekit-unit = { path = "../unit" }
 dyn-clone.workspace = true

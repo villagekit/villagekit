@@ -1,4 +1,6 @@
 use dyn_clone::DynClone;
+use villagekit_math::Vector3;
+use villagekit_number::Number;
 use villagekit_render::{Renderable, Transform};
 use villagekit_unit::Length;
 
@@ -61,8 +63,21 @@ impl Product {
     }
 
     pub fn translate(self, x: Length, y: Length, z: Length) -> Self {
+        self.update_transform(|t| t.translate(x, y, z))
+    }
+
+    pub fn rotate(
+        self,
+        axis: Vector3<Number>,
+        angle: Number,
+        origin: Option<Vector3<Length>>,
+    ) -> Self {
+        self.update_transform(|t| t.rotate(axis, angle, origin))
+    }
+
+    fn update_transform(self, updater: impl Fn(Transform) -> Transform) -> Self {
         Self {
-            transform: self.transform.translate(x, y, z),
+            transform: updater(self.transform),
             ..self
         }
     }
@@ -70,7 +85,7 @@ impl Product {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 
     #[test]
     fn it_works() {

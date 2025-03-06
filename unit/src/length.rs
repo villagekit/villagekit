@@ -1,6 +1,13 @@
 use serde::{Deserialize, Serialize};
-use std::ops::{Add, Div, Mul, Sub};
-use villagekit_number::{num, ops::Sqrt, Number};
+use std::{
+    fmt::Display,
+    ops::{Add, Div, Mul, Sub},
+};
+use villagekit_number::{
+    num,
+    traits::{Abs, ApproxEq, One, Sqrt, Zero},
+    Number,
+};
 
 use crate::{Area, Volume};
 
@@ -8,9 +15,9 @@ use crate::{Area, Volume};
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Length(pub Number);
 
-impl From<Length> for f32 {
-    fn from(value: Length) -> Self {
-        value.0.into()
+impl Display for Length {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}m", self.0)
     }
 }
 
@@ -35,6 +42,14 @@ impl Mul<Number> for Length {
 
     fn mul(self, rhs: Number) -> Self::Output {
         Self(self.0 * rhs)
+    }
+}
+
+impl Mul<Length> for Number {
+    type Output = Length;
+
+    fn mul(self, rhs: Length) -> Self::Output {
+        Length(self * rhs.0)
     }
 }
 
@@ -70,6 +85,18 @@ impl Div<Length> for Length {
     }
 }
 
+impl Zero for Length {
+    fn zero() -> Self {
+        Self(Number::zero())
+    }
+}
+
+impl One for Length {
+    fn one() -> Self {
+        Self(Number::one())
+    }
+}
+
 impl Sqrt for Length {
     type Output = Number;
 
@@ -78,9 +105,29 @@ impl Sqrt for Length {
     }
 }
 
+impl Abs for Length {
+    type Output = Self;
+
+    fn abs(self) -> Self::Output {
+        Self(self.0.abs())
+    }
+}
+
+impl ApproxEq for Length {
+    fn approx_eq(&self, rhs: &Self) -> bool {
+        self.0.approx_eq(&rhs.0)
+    }
+}
+
 impl Default for Length {
     fn default() -> Self {
         Self(num!(0))
+    }
+}
+
+impl From<Length> for f32 {
+    fn from(value: Length) -> Self {
+        value.0.into()
     }
 }
 

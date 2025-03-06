@@ -6,26 +6,32 @@ use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridSettings};
 #[require(Transform, Visibility)]
 pub struct Sandbox;
 
-pub(crate) fn setup_sandbox(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+pub(crate) fn setup_sandbox(mut commands: Commands) {
+    /*
     // circular base
     commands.spawn((
         Mesh3d(meshes.add(Circle::new(4.0))),
         MeshMaterial3d(materials.add(Color::WHITE)),
         Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
     ));
+    */
 
-    // light
-    commands.spawn((
-        PointLight {
-            shadows_enabled: true,
-            ..default()
-        },
-        Transform::from_xyz(4.0, 4.0, 12.0),
-    ));
+    // lights
+    let num_lights = 6;
+    for _light_index in 0..num_lights {
+        commands.spawn((
+            PointLight {
+                shadows_enabled: true,
+                range: 100_f32,
+                ..default()
+            },
+            Transform::from_xyz(
+                rand::random_range(-20_f32..20_f32),
+                rand::random_range(20_f32..30_f32),
+                rand::random_range(-20_f32..20_f32),
+            ),
+        ));
+    }
 
     // camera
     commands.spawn((

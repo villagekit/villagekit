@@ -1,12 +1,25 @@
 use serde::{Deserialize, Serialize};
-use std::ops::{Add, Div, Mul, Sub};
-use villagekit_number::{num, ops::Sqrt, Number};
+use std::{
+    fmt::Display,
+    ops::{Add, Div, Mul, Sub},
+};
+use villagekit_number::{
+    num,
+    traits::{Abs, ApproxEq, One, Sqrt, Zero},
+    Number,
+};
 
 use crate::{Area, Length};
 
 // Canonical value is meter^3
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Volume(pub Number);
+
+impl Display for Volume {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}m^3", self.0)
+    }
+}
 
 impl From<Volume> for f32 {
     fn from(value: Volume) -> Self {
@@ -70,11 +83,37 @@ impl Div<Volume> for Volume {
     }
 }
 
+impl Zero for Volume {
+    fn zero() -> Self {
+        Self(Number::zero())
+    }
+}
+
+impl One for Volume {
+    fn one() -> Self {
+        Self(Number::one())
+    }
+}
+
 impl Sqrt for Volume {
     type Output = Area;
 
     fn sqrt(self) -> Self::Output {
         Area(self.0.sqrt())
+    }
+}
+
+impl Abs for Volume {
+    type Output = Self;
+
+    fn abs(self) -> Self::Output {
+        Self(self.0.abs())
+    }
+}
+
+impl ApproxEq for Volume {
+    fn approx_eq(&self, rhs: &Self) -> bool {
+        self.0.approx_eq(&rhs.0)
     }
 }
 
