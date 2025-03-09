@@ -18,7 +18,7 @@ edition = "2021"
 [workspace.dependencies]
 dyn-clone = "1.0.18"
 glam = "0.29.2"
-num-traits = "0.2.19"
+num-traits = "0.2.16"
 serde = { version = "1.0.217", features = ["derive"] }
 
 ## https://bevyengine.org/learn/quick-start/getting-started/setup/
