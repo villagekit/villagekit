@@ -168,3 +168,26 @@ system_qty_macro! {
         gal  => Gallons,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    use villagekit_number::num;
+
+    #[test]
+    fn test_qty_abbrev() {
+        // qty!(1 m) should be equal to Length::from_scalar::<Meters>(num!(1))
+        let length_m = qty!(1 m);
+        let expected_m = Length::from_scalar::<Meters>(num!(1));
+        assert_eq!(length_m, expected_m);
+    }
+
+    #[test]
+    fn test_qty_type() {
+        // qty!(1 Meters) should be equal to Length::from_scalar::<Meters>(num!(1))
+        let length_m = qty!(1.0 Meters);
+        let expected_m = Length::from_scalar::<Meters>(num!(1.0));
+        assert_eq!(length_m, expected_m);
+    }
+}

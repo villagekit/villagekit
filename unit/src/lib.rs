@@ -10,11 +10,11 @@ pub use villagekit_number::{
 
 /// A trait implemented by all physical quantities.
 pub trait Dimension {
-    type CanonicalUnit: UnitOf<Self>;
+    type CanonicalUnit: UnitOf<Dim = Self>;
 
     /// Converts the dimension to the given unit.
     #[inline]
-    fn to<U: UnitOf<Self>>(&self) -> Number
+    fn to<U: UnitOf<Dim = Self>>(&self) -> Number
     where
         Self: Sized,
     {
@@ -23,7 +23,7 @@ pub trait Dimension {
 
     /// Creates a new dimension from the given scalar and unit.
     #[inline]
-    fn from_scalar<U: UnitOf<Self>>(value: Number) -> Self
+    fn from_scalar<U: UnitOf<Dim = Self>>(value: Number) -> Self
     where
         Self: Sized,
     {
@@ -43,7 +43,9 @@ macro_rules! to {
     };
 }
 
-pub trait UnitOf<M: Dimension + ?Sized> {
+pub trait UnitOf {
+    type Dim: Dimension;
+
     /// Converts a scalar value from the canonical unit to unit of `Self`.
     fn from_canonical(canonical: Number) -> Number;
     /// Converts a scalar value from the unit of `Self` to the canonical unit.
@@ -142,7 +144,9 @@ macro_rules! unit {
         );
 
         $(
-            impl $crate::UnitOf<$dimension> for $unit {
+            impl $crate::UnitOf for $unit {
+                type Dim = $dimension;
+
                 #[inline]
                 fn from_canonical(canonical: $crate::Number) -> $crate::Number {
                     canonical * $crate::num!($rhsper)
@@ -154,7 +158,9 @@ macro_rules! unit {
             }
         )?
         $(
-            impl $crate::UnitOf<$dimension> for $unit {
+            impl $crate::UnitOf for $unit {
+                type Dim = $dimension;
+
                 #[inline]
                 fn from_canonical(canonical: $crate::Number) -> $crate::Number {
                     canonical /  $crate::num!($lhsper)
@@ -313,6 +319,9 @@ macro_rules! system_qty_macro {
                     };
                 )*
             )*
+            ($scalar:literal $other_unit:ident) => {
+                <$other_unit as UnitOf>::Dim::from_scalar::<$other_unit>(num!($scalar))
+            };
         }
     };
 }
