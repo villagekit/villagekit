@@ -2,7 +2,7 @@ use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
 use villagekit_math::{Quaternion, Vector3};
 use villagekit_number::Number;
-use villagekit_unit::Length;
+use villagekit_unit::{Dimension, Length};
 
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
 pub struct Transform {
@@ -43,7 +43,7 @@ impl Transform {
             // - Translate so that `origin` is at the origin.
             // - Rotate the translation (in length units) about the new origin
             // - Translate back to the original pivot by adding `origin` again
-            translation: (self.translation - origin) * rotation + origin,
+            translation: (self.translation - origin).multiply_quaternion(rotation) + origin,
             // Apply the rotation
             rotation: self.rotation * rotation,
         }
@@ -53,7 +53,7 @@ impl Transform {
 impl From<Transform> for BevyTransform {
     fn from(value: Transform) -> Self {
         BevyTransform {
-            translation: value.translation.into(),
+            translation: value.translation.map(|v| v.canonical()).into(),
             rotation: value.rotation.into(),
             ..Default::default()
         }
