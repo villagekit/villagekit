@@ -1,7 +1,7 @@
-pub mod dimensions;
+pub mod system;
 
-pub use dimensions::*;
 pub use serde::{Deserialize, Serialize};
+pub use system::*;
 pub use villagekit_number::{
     num,
     traits::{Abs, ApproxEq, One, Sqrt, Zero},
@@ -131,7 +131,7 @@ macro_rules! unit_type {
 ///
 /// Conversions are implemented by multiplying or dividing by a scalar value.
 #[macro_export]
-macro_rules! simple_unit {
+macro_rules! unit {
     (
         $(#[$meta:meta])*
         $vis:vis $unit:ident of dimension $dimension:ident = $($rhsper:literal per canonical)? $(per $lhsper:literal canonical)?
@@ -169,7 +169,7 @@ macro_rules! simple_unit {
 }
 
 /// A macro for creating a new dimension type and any simple associated unit types.
-/// Associated unit types are parsed using similar syntax to the [`simple_unit!`] macro.
+/// Associated unit types are parsed using similar syntax to the [`unit!`] macro.
 #[macro_export]
 macro_rules! dimension {
     (
@@ -289,7 +289,7 @@ macro_rules! dimension {
         }
 
         $(
-            $crate::simple_unit!(
+            $crate::unit!(
                 $(#[$unit_meta])*
                 $vis $unit of dimension $name = $($rhsper per canonical)? $(per $lhsper canonical)?
             );
@@ -298,5 +298,21 @@ macro_rules! dimension {
         $(
             $crate::__measure_conversions!($name, $($converts)*);
         )?
+    };
+}
+
+#[macro_export]
+macro_rules! system_qty_macro {
+    ($macro_name:ident, $( $dimension:ident { $( $abbrev:ident => $unit:ident ),* $(,)? } )* ) => {
+        #[macro_export]
+        macro_rules! qty {
+            $(
+                $(
+                    ($scalar:literal $abbrev) => {
+                        $dimension::from_scalar::<$unit>(num!($scalar))
+                    };
+                )*
+            )*
+        }
     };
 }
