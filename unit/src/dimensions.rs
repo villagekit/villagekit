@@ -128,3 +128,10 @@ impl Sqrt for Volume {
         Area(self.0.sqrt())
     }
 }
+
+#[macro_export]
+macro_rules! qty {
+    ($scalar:literal m) => {
+        $crate::Length::from_scalar::<$crate::Meters>(num!($scalar))
+    };
+}

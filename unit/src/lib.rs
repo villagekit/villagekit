@@ -2,7 +2,11 @@ pub mod dimensions;
 
 pub use dimensions::*;
 pub use serde::{Deserialize, Serialize};
-pub use villagekit_number::{num, traits::Sqrt, Number};
+pub use villagekit_number::{
+    num,
+    traits::{Abs, ApproxEq, One, Sqrt, Zero},
+    Number,
+};
 
 /// A trait implemented by all physical quantities.
 pub trait Dimension {
@@ -255,6 +259,32 @@ macro_rules! dimension {
         impl core::ops::DivAssign<$crate::Number> for $name {
             fn div_assign(&mut self, rhs: $crate::Number) {
                 self.0 = self.0.clone() / rhs;
+            }
+        }
+
+        impl $crate::Zero for $name {
+            fn zero() -> Self {
+                $name($crate::Number::ZERO)
+            }
+        }
+
+        impl $crate::One for $name {
+            fn one() -> Self {
+                $name($crate::Number::ONE)
+            }
+        }
+
+        impl $crate::Abs for $name {
+            type Output = $name;
+
+            fn abs(self) -> Self {
+                $name(self.0.abs())
+            }
+        }
+
+        impl $crate::ApproxEq for $name {
+            fn approx_eq(&self, other: &Self) -> bool {
+                self.0.approx_eq(&other.0)
             }
         }
 
