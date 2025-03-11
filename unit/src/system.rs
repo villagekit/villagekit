@@ -1,6 +1,6 @@
 use villagekit_number::{Number, Sqrt};
 
-use crate::{dimension, system_qty_macro};
+use crate::dimension;
 
 dimension!(
     /// Represents a distance.
@@ -34,16 +34,9 @@ dimension!(
         // Self * Force => Energy in Joules,
         Self * Length => Area,
         Self * Area => Volume,
+        Sqrt => Number,
     }
 );
-
-impl Sqrt for Length {
-    type Output = Number;
-
-    fn sqrt(self) -> Self::Output {
-        self.0.sqrt()
-    }
-}
 
 dimension!(
     pub Area {
@@ -70,16 +63,9 @@ dimension!(
     } where {
         Self / Length => Length,
         Self * Length => Volume,
+        Sqrt => Length,
     }
 );
-
-impl Sqrt for Area {
-    type Output = Length;
-
-    fn sqrt(self) -> Self::Output {
-        Length(self.0.sqrt())
-    }
-}
 
 dimension!(
     pub Volume {
@@ -118,15 +104,26 @@ dimension!(
     } where {
         Self / Length => Area,
         Self / Area => Length,
+        Sqrt => Area,
     }
 );
 
-impl Sqrt for Volume {
-    type Output = Area;
-
-    fn sqrt(self) -> Self::Output {
-        Area(self.0.sqrt())
-    }
+macro_rules! system_qty_macro {
+    ($macro_name:ident, $( $dimension:ident { $( $abbrev:ident => $unit:ident ),* $(,)? } )* ) => {
+        #[macro_export]
+        macro_rules! qty {
+            $(
+                $(
+                    ($scalar:literal $abbrev) => {
+                        $dimension::from_scalar::<$unit>(num!($scalar))
+                    };
+                )*
+            )*
+            ($scalar:literal $other_unit:ident) => {
+                <$other_unit as UnitOf>::Dim::from_scalar::<$other_unit>(num!($scalar))
+            };
+        }
+    };
 }
 
 system_qty_macro! {

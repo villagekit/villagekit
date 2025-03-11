@@ -79,6 +79,28 @@ macro_rules! __measure_conversions {
 
         $crate::__measure_conversions!($self, $($rest)*);
     };
+    ($self:ident, Sqrt => Number, $($rest:tt)*) => {
+        impl villagekit_number::traits::Sqrt for $self {
+            type Output = Number;
+            fn sqrt(self) -> Self::Output {
+                use $crate::Dimension;
+                self.canonical().sqrt()
+            }
+        }
+
+        $crate::__measure_conversions!($self, $($rest)*);
+    };
+    ($self:ident, Sqrt => $output:ident, $($rest:tt)*) => {
+        impl villagekit_number::traits::Sqrt for $self {
+            type Output = $output;
+            fn sqrt(self) -> Self::Output {
+                use $crate::Dimension;
+                $output::from_scalar::<<$output as Dimension>::CanonicalUnit>(self.canonical().sqrt())
+            }
+        }
+
+        $crate::__measure_conversions!($self, $($rest)*);
+    };
 }
 
 #[macro_export]
@@ -304,24 +326,5 @@ macro_rules! dimension {
         $(
             $crate::__measure_conversions!($name, $($converts)*);
         )?
-    };
-}
-
-#[macro_export]
-macro_rules! system_qty_macro {
-    ($macro_name:ident, $( $dimension:ident { $( $abbrev:ident => $unit:ident ),* $(,)? } )* ) => {
-        #[macro_export]
-        macro_rules! qty {
-            $(
-                $(
-                    ($scalar:literal $abbrev) => {
-                        $dimension::from_scalar::<$unit>(num!($scalar))
-                    };
-                )*
-            )*
-            ($scalar:literal $other_unit:ident) => {
-                <$other_unit as UnitOf>::Dim::from_scalar::<$other_unit>(num!($scalar))
-            };
-        }
     };
 }
