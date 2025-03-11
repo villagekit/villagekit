@@ -34,7 +34,6 @@ dimension!(
         // Self * Force => Energy in Joules,
         Self * Length => Area,
         Self * Area => Volume,
-        Sqrt => Number,
     }
 );
 
@@ -104,7 +103,6 @@ dimension!(
     } where {
         Self / Length => Area,
         Self / Area => Length,
-        Sqrt => Area,
     }
 );
 

@@ -79,17 +79,6 @@ macro_rules! __measure_conversions {
 
         $crate::__measure_conversions!($self, $($rest)*);
     };
-    ($self:ident, Sqrt => Number, $($rest:tt)*) => {
-        impl villagekit_number::traits::Sqrt for $self {
-            type Output = Number;
-            fn sqrt(self) -> Self::Output {
-                use $crate::Dimension;
-                self.canonical().sqrt()
-            }
-        }
-
-        $crate::__measure_conversions!($self, $($rest)*);
-    };
     ($self:ident, Sqrt => $output:ident, $($rest:tt)*) => {
         impl villagekit_number::traits::Sqrt for $self {
             type Output = $output;
