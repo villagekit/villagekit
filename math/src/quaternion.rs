@@ -5,6 +5,7 @@ use villagekit_number::{
     traits::{ApproxEq, Sqrt, Trig},
     Number,
 };
+use villagekit_unit::Angle;
 
 use crate::vector3::Vector3;
 
@@ -20,7 +21,7 @@ impl Quaternion {
     pub fn new(x: Number, y: Number, z: Number, w: Number) -> Self {
         Self { x, y, z, w }
     }
-    pub fn from_axis_angle(axis: Vector3<Number>, angle: Number) -> Self {
+    pub fn from_axis_angle(axis: Vector3<Number>, angle: Angle) -> Self {
         let axis = axis.normalize();
         let half_angle = Number::HALF * angle;
         let s = half_angle.sin();

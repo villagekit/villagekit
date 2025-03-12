@@ -1,4 +1,4 @@
-use villagekit_number::{Number, Sqrt};
+use villagekit_number::{Number, Trig};
 
 use crate::dimension;
 
@@ -106,6 +106,61 @@ dimension!(
     }
 );
 
+dimension!(
+    pub Angle {
+        canonical: Radians,
+
+        /// Represents the radian unit of angle.
+        Radians: 1.0 per canonical,
+        /// Represents the degree unit of angle.
+        Rotations: per 6.28318530717959 canonical,
+        /// Represents the degree unit of angle.
+        Degrees: 57.2957795130823 per canonical,
+        /// Represents the gradian unit of angle.
+        Gradians: 63.6619772367581 per canonical,
+    }
+);
+
+impl Trig for Angle {
+    type Output = Number;
+
+    fn hypot(&self, other: Self) -> Self::Output {
+        self.0.hypot(other.0)
+    }
+
+    fn sin(&self) -> Self::Output {
+        self.0.sin()
+    }
+
+    fn cos(&self) -> Self::Output {
+        self.0.cos()
+    }
+
+    fn tan(&self) -> Self::Output {
+        self.0.tan()
+    }
+
+    fn asin(&self) -> Self::Output {
+        self.0.asin()
+    }
+
+    fn acos(&self) -> Self::Output {
+        self.0.acos()
+    }
+
+    fn atan(&self) -> Self::Output {
+        self.0.atan()
+    }
+
+    fn atan2(&self, other: Self) -> Self::Output {
+        self.0.atan2(other.0)
+    }
+
+    fn sin_cos(&self) -> (Self::Output, Self::Output) {
+        self.0.sin_cos()
+    }
+}
+
 macro_rules! system_qty_macro {
     ($macro_name:ident, $( $dimension:ident { $( $abbrev:ident => $unit:ident ),* $(,)? } )* ) => {
         #[macro_export]
@@ -161,6 +216,12 @@ system_qty_macro! {
         pt   => Pints,
         qt   => Quarts,
         gal  => Gallons,
+    }
+    Angle {
+        rad  => Radians,
+        rot  => Rotations,
+        deg  => Degrees,
+        grad => Gradians,
     }
 }
 
