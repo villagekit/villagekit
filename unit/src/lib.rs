@@ -12,24 +12,6 @@ pub use villagekit_number::{
 pub trait Dimension {
     type CanonicalUnit: UnitOf<Dim = Self>;
 
-    /// Converts the dimension to the given unit as number.
-    #[inline]
-    fn to<U: UnitOf<Dim = Self>>(&self) -> Number
-    where
-        Self: Sized,
-    {
-        (self.canonical() / U::CONVERSION_COEFFICIENT) - U::CONVERSION_CONSTANT
-    }
-
-    /// Creates a new dimension from the given number and unit.
-    #[inline]
-    fn from_scalar<U: UnitOf<Dim = Self>>(value: Number) -> Self
-    where
-        Self: Sized,
-    {
-        Self::from_canonical((value + U::CONVERSION_CONSTANT) * U::CONVERSION_COEFFICIENT)
-    }
-
     /// Returns the canonical representation of the dimension.
     fn canonical(&self) -> Number;
     /// Creates a new dimension from the canonical representation.
@@ -117,7 +99,6 @@ macro_rules! unit_type {
         impl core::ops::Mul<$crate::Number> for $unit {
             type Output = $dimension;
             fn mul(self, rhs: $crate::Number) -> $dimension {
-                use $crate::Dimension;
                 $dimension::from_scalar::<$unit>(rhs)
             }
         }
@@ -125,7 +106,6 @@ macro_rules! unit_type {
         impl core::ops::Mul<$unit> for $crate::Number {
             type Output = $dimension;
             fn mul(self, _rhs: $unit) -> $dimension {
-                use $crate::Dimension;
                 $dimension::from_scalar::<$unit>(self)
             }
         }
@@ -133,7 +113,6 @@ macro_rules! unit_type {
         impl $unit {
             #[inline]
             pub fn from_scalar(value: $crate::Number) -> $dimension {
-                use $crate::Dimension;
                 $dimension::from_scalar::<Self>(value)
             }
         }
@@ -190,10 +169,31 @@ macro_rules! dimension {
             $($converts:tt)*
         })?
     ) => {
-        // TODO remove inner pub
         $(#[$meta])*
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, $crate::Serialize, $crate::Deserialize)]
-        $vis struct $name(pub $crate::Number);
+        $vis struct $name($crate::Number);
+
+        impl $name {
+            /// Converts the dimension to the given unit as number.
+            #[inline]
+            pub const fn to<U: $crate::UnitOf<Dim = Self>>(&self) -> Number
+            where
+                Self: Sized,
+            {
+                (self.0.div(U::CONVERSION_COEFFICIENT)).sub(U::CONVERSION_CONSTANT)
+            }
+
+            /// Creates a new dimension from the given number and unit.
+            #[inline]
+            pub const fn from_scalar<U: $crate::UnitOf<Dim = Self>>(value: Number) -> Self
+            where
+                Self: Sized,
+            {
+                Self((value.add(U::CONVERSION_CONSTANT)).mul(U::CONVERSION_COEFFICIENT))
+            }
+
+        }
+
 
         impl $crate::Dimension for $name {
             type CanonicalUnit = $canonical_unit;

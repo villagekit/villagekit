@@ -62,21 +62,22 @@ impl From<Transform> for BevyTransform {
 #[cfg(test)]
 mod tests {
     use villagekit_number::{num, traits::ApproxEq};
+    use villagekit_unit::qty;
 
     use super::*;
 
     #[test]
     fn test_apply_translation() {
         let initial = Transform {
-            translation: Vector3::new(Length(num!(1)), Length(num!(2)), Length(num!(3))),
+            translation: Vector3::new(qty!(1 m), qty!(2 m), qty!(3 m)),
             rotation: Quaternion::default(),
         };
-        let delta = Vector3::new(Length(num!(4)), Length(num!(-2)), Length(num!(0)));
+        let delta = Vector3::new(qty!(4 m), qty!(-2 m), qty!(0 m));
         let result = initial.apply_translation(delta);
         // Expected translation is (1+4, 2-2, 3+0) = (5, 0, 3)
         assert_eq!(
             result.translation,
-            Vector3::new(Length(num!(5)), Length(num!(0)), Length(num!(3)))
+            Vector3::new(qty!(5 m), qty!(0 m), qty!(3 m))
         );
         // Rotation remains unchanged (identity)
         assert_eq!(result.rotation, Quaternion::default());
@@ -85,10 +86,10 @@ mod tests {
     #[test]
     fn test_translate() {
         let initial = Transform::default();
-        let result = initial.translate(Length(num!(1)), Length(num!(2)), Length(num!(3)));
+        let result = initial.translate(qty!(1 m), qty!(2 m), qty!(3 m));
         assert_eq!(
             result.translation,
-            Vector3::new(Length(num!(1)), Length(num!(2)), Length(num!(3)))
+            Vector3::new(qty!(1 m), qty!(2 m), qty!(3 m))
         );
     }
 
@@ -96,7 +97,7 @@ mod tests {
     fn test_apply_rotation() {
         // Start with a non-default rotation: 45° around the y-axis.
         let initial = Transform {
-            translation: Vector3::new(Length(num!(1)), Length(num!(0)), Length(num!(0))),
+            translation: Vector3::new(qty!(1 m), qty!(0 m), qty!(0 m)),
             rotation: Quaternion::from_axis_angle(
                 Vector3::new(num!(0), num!(1), num!(0)),
                 Number::FRAC_PI_4,
@@ -135,7 +136,7 @@ mod tests {
     fn test_rotate_without_origin() {
         // Rotate a point at (1,0,0) 90° about the z-axis using default origin (0,0,0).
         let initial = Transform {
-            translation: Vector3::new(Length(num!(1)), Length(num!(0)), Length(num!(0))),
+            translation: Vector3::new(qty!(1 m), qty!(0 m), qty!(0 m)),
             rotation: Quaternion::default(),
         };
         let axis = Vector3::new(num!(0), num!(0), num!(1));
@@ -144,7 +145,7 @@ mod tests {
         // (1,0,0) rotated about (0,0,0) by 90° should become (0,1,0)
         assert_approx_eq!(
             &result.translation,
-            &Vector3::new(Length(num!(0)), Length(num!(1)), Length(num!(0)))
+            &Vector3::new(qty!(0 m), qty!(1 m), qty!(0 m))
         );
     }
 
@@ -152,18 +153,18 @@ mod tests {
     fn test_rotate_with_origin() {
         // Rotate a point at (2,0,0) 90° about the z-axis with pivot (1,0,0).
         let initial = Transform {
-            translation: Vector3::new(Length(num!(2)), Length(num!(0)), Length(num!(0))),
+            translation: Vector3::new(qty!(2 m), qty!(0 m), qty!(0 m)),
             rotation: Quaternion::default(),
         };
         let axis = Vector3::new(num!(0), num!(0), num!(1));
         let angle = Number::FRAC_PI_2;
-        let origin = Vector3::new(Length(num!(1)), Length(num!(0)), Length(num!(0)));
+        let origin = Vector3::new(qty!(1 m), qty!(0 m), qty!(0 m));
         let result = initial.rotate(axis, angle, Some(origin));
         // Calculation:
         // (2,0,0) - (1,0,0) = (1,0,0) rotated 90° gives (0,1,0), then add origin -> (1,1,0)
         assert_approx_eq!(
             &result.translation,
-            &Vector3::new(Length(num!(1)), Length(num!(1)), Length(num!(0)))
+            &Vector3::new(qty!(1 m), qty!(1 m), qty!(0 m))
         );
     }
 }

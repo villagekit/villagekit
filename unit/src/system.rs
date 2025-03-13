@@ -152,7 +152,7 @@ macro_rules! system_qty_macro {
             $(
                 $(
                     ($scalar:literal $abbrev) => {
-                        $dimension::from_scalar::<$unit>(num!($scalar))
+                        $dimension::from_scalar::<$crate::$unit>(num!($scalar))
                     };
                 )*
             )*
