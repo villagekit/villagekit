@@ -140,22 +140,6 @@ impl Trig for Angle {
         self.0.tan()
     }
 
-    fn asin(&self) -> Self::Output {
-        self.0.asin()
-    }
-
-    fn acos(&self) -> Self::Output {
-        self.0.acos()
-    }
-
-    fn atan(&self) -> Self::Output {
-        self.0.atan()
-    }
-
-    fn atan2(&self, other: Self) -> Self::Output {
-        self.0.atan2(other.0)
-    }
-
     fn sin_cos(&self) -> (Self::Output, Self::Output) {
         self.0.sin_cos()
     }

@@ -55,11 +55,16 @@ pub trait Trig {
     fn sin(&self) -> Self::Output;
     fn cos(&self) -> Self::Output;
     fn tan(&self) -> Self::Output;
+    fn sin_cos(&self) -> (Self::Output, Self::Output);
+}
+
+pub trait TrigInv {
+    type Output;
+
     fn asin(&self) -> Self::Output;
     fn acos(&self) -> Self::Output;
     fn atan(&self) -> Self::Output;
     fn atan2(&self, other: Self) -> Self::Output;
-    fn sin_cos(&self) -> (Self::Output, Self::Output);
 }
 
 pub trait Hyp {

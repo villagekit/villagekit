@@ -156,6 +156,15 @@ impl Trig for Number {
         Self(self.0.tan())
     }
 
+    fn sin_cos(&self) -> (Self::Output, Self::Output) {
+        let (s, c) = self.0.sin_cos();
+        (Self(s), Self(c))
+    }
+}
+
+impl TrigInv for Number {
+    type Output = Self;
+
     fn asin(&self) -> Self::Output {
         Self(self.0.asin())
     }
@@ -170,11 +179,6 @@ impl Trig for Number {
 
     fn atan2(&self, other: Self) -> Self::Output {
         Self(self.0.atan2(other.0))
-    }
-
-    fn sin_cos(&self) -> (Self::Output, Self::Output) {
-        let (s, c) = self.0.sin_cos();
-        (Self(s), Self(c))
     }
 }
 

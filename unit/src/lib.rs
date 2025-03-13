@@ -12,22 +12,22 @@ pub use villagekit_number::{
 pub trait Dimension {
     type CanonicalUnit: UnitOf<Dim = Self>;
 
-    /// Converts the dimension to the given unit.
+    /// Converts the dimension to the given unit as number.
     #[inline]
     fn to<U: UnitOf<Dim = Self>>(&self) -> Number
     where
         Self: Sized,
     {
-        U::from_canonical(self.canonical())
+        (self.canonical() / U::CONVERSION_COEFFICIENT) - U::CONVERSION_CONSTANT
     }
 
-    /// Creates a new dimension from the given scalar and unit.
+    /// Creates a new dimension from the given number and unit.
     #[inline]
     fn from_scalar<U: UnitOf<Dim = Self>>(value: Number) -> Self
     where
         Self: Sized,
     {
-        Self::from_canonical(U::to_canonical(value))
+        Self::from_canonical((value + U::CONVERSION_CONSTANT) * U::CONVERSION_COEFFICIENT)
     }
 
     /// Returns the canonical representation of the dimension.
@@ -45,11 +45,11 @@ macro_rules! to {
 
 pub trait UnitOf {
     type Dim: Dimension;
-
-    /// Converts a scalar value from the canonical unit to unit of `Self`.
-    fn from_canonical(canonical: Number) -> Number;
-    /// Converts a scalar value from the unit of `Self` to the canonical unit.
-    fn to_canonical(converted: Number) -> Number;
+    // To convert:
+    //   canonical value = (this value + constant) * coefficient
+    //   this value = (canonical value / coefficient) - constant
+    const CONVERSION_COEFFICIENT: Number;
+    const CONVERSION_CONSTANT: Number;
 }
 
 #[macro_export]
@@ -158,28 +158,16 @@ macro_rules! unit {
             impl $crate::UnitOf for $unit {
                 type Dim = $dimension;
 
-                #[inline]
-                fn from_canonical(canonical: $crate::Number) -> $crate::Number {
-                    canonical * $crate::num!($rhsper)
-                }
-                #[inline]
-                fn to_canonical(converted: $crate::Number) -> $crate::Number {
-                    converted / $crate::num!($rhsper)
-                }
+                const CONVERSION_COEFFICIENT: $crate::Number = $crate::num!($rhsper);
+                const CONVERSION_CONSTANT: $crate::Number = $crate::num!(0);
             }
         )?
         $(
             impl $crate::UnitOf for $unit {
                 type Dim = $dimension;
 
-                #[inline]
-                fn from_canonical(canonical: $crate::Number) -> $crate::Number {
-                    canonical /  $crate::num!($lhsper)
-                }
-                #[inline]
-                fn to_canonical(converted: $crate::Number) -> $crate::Number {
-                    converted *  $crate::num!($lhsper)
-                }
+                const CONVERSION_COEFFICIENT: $crate::Number = $crate::num!($lhsper);
+                const CONVERSION_CONSTANT: $crate::Number = $crate::num!(0);
             }
         )?
     };
