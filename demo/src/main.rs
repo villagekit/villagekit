@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use villagekit_engine::{traits::*, Transform, *};
+use villagekit_engine::{Transform, *};
 
 fn main() {
     App::new()
@@ -25,42 +25,14 @@ impl Assembly for Chair {
         } = *self;
 
         vec![
-            Beam::z(Length(num!(0)), Length(num!(0)), (Length(num!(0)), height)),
-            Beam::z(
-                width - Length(num!(1)),
-                Length(num!(0)),
-                (Length(num!(0)), height),
-            ),
-            Beam::z(
-                Length(num!(0)),
-                depth - Length(num!(1)),
-                (Length(num!(0)), height),
-            ),
-            Beam::z(
-                width - Length(num!(1)),
-                depth - Length(num!(1)),
-                (Length(num!(0)), height),
-            ),
-            Beam::x(
-                (Length(num!(0)), width),
-                Length(num!(1)),
-                height - Length(num!(2)),
-            ),
-            Beam::x(
-                (Length(num!(0)), width),
-                depth - Length(num!(2)),
-                height - Length(num!(2)),
-            ),
-            Beam::y(
-                Length(num!(1)),
-                (Length(num!(0)), depth),
-                height - Length(num!(1)),
-            ),
-            Beam::y(
-                width - Length(num!(2)),
-                (Length(num!(0)), depth),
-                height - Length(num!(1)),
-            ),
+            Beam::z(qty!(0 m), qty!(0 m), (qty!(0 m), height)),
+            Beam::z(width - qty!(1 m), qty!(0 m), (qty!(0 m), height)),
+            Beam::z(qty!(0 m), depth - qty!(1 m), (qty!(0 m), height)),
+            Beam::z(width - qty!(1 m), depth - qty!(1 m), (qty!(0 m), height)),
+            Beam::x((qty!(0 m), width), qty!(1 m), height - qty!(2 m)),
+            Beam::x((qty!(0 m), width), depth - qty!(2 m), height - qty!(2 m)),
+            Beam::y(qty!(1 m), (qty!(0 m), depth), height - qty!(1 m)),
+            Beam::y(width - qty!(2 m), (qty!(0 m), depth), height - qty!(1 m)),
         ]
     }
 }
@@ -78,7 +50,7 @@ impl Beam {
         let mut beam = Self { length }.place();
 
         if x.0 > x.1 {
-            beam = beam.rotate(Y_AXIS, HALF_ROTATION, None)
+            beam = beam.rotate(Y_AXIS, Rotations::HALF, None)
         }
 
         beam.translate(x.0, y, z)
@@ -89,10 +61,10 @@ impl Beam {
 
         let mut beam = Self { length }.place();
 
-        beam = beam.rotate(Z_AXIS, QUARTER_ROTATION, None);
+        beam = beam.rotate(Z_AXIS, Rotations::QUARTER, None);
 
         if y.0 > y.1 {
-            beam = beam.rotate(X_AXIS, HALF_ROTATION, None)
+            beam = beam.rotate(X_AXIS, Rotations::HALF, None)
         }
 
         beam.translate(x, y.0, z)
@@ -103,10 +75,10 @@ impl Beam {
 
         let mut beam = Self { length }.place();
 
-        beam = beam.rotate(Y_AXIS, -QUARTER_ROTATION, None);
+        beam = beam.rotate(Y_AXIS, -Rotations::QUARTER, None);
 
         if z.0 > z.1 {
-            beam = beam.rotate(X_AXIS, HALF_ROTATION, None)
+            beam = beam.rotate(X_AXIS, Rotations::HALF, None)
         }
 
         beam.translate(x, y, z.0)
@@ -115,7 +87,7 @@ impl Beam {
 
 impl Stock for Beam {
     fn render(&self) -> Renderable {
-        let grid_unit: Length = Meter(num!(1)).into();
+        let grid_unit: Length = qty!(1 m);
 
         Renderable::default()
             .insert_mesh(
@@ -152,9 +124,9 @@ impl Stock for Beam {
 
 fn setup_model(mut commands: Commands, sandbox: Query<Entity, With<Sandbox>>) {
     let test = Chair {
-        width: Length(num!(10)),
-        depth: Length(num!(10)),
-        height: Length(num!(10)),
+        width: qty!(10 m),
+        depth: qty!(10 m),
+        height: qty!(10 m),
     };
     spawn_product(sandbox.single(), test.place(), &mut commands);
 }

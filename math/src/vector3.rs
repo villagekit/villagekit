@@ -226,6 +226,13 @@ impl<A> Vector3<A> {
     }
 }
 
+impl<A> Vector3<A> {
+    pub fn map<B>(self, mapper: impl Fn(A) -> B) -> Vector3<B> {
+        let Vector3 { x, y, z } = self;
+        Vector3::new(mapper(x), mapper(y), mapper(z))
+    }
+}
+
 impl<N> From<Vector3<N>> for glam::Vec3
 where
     N: Into<f32>,

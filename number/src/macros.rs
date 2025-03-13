@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! num {
     ($($ body:tt)*) => {{
-        const __NUMBER: Number = Number::parse_unchecked(concat!($(stringify!($ body)),*));
+        const __NUMBER: $crate::Number = $crate::Number::parse_unchecked(concat!($(stringify!($ body)),*));
         __NUMBER
     }}
 }

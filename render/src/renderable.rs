@@ -5,7 +5,7 @@ use bevy_render::mesh::Mesh;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use villagekit_number::Number;
-use villagekit_unit::Length;
+use villagekit_unit::{Dimension, Length};
 
 use crate::Transform;
 
@@ -55,7 +55,12 @@ impl RenderableMesh {
                 x_length,
                 y_length,
                 z_length,
-            } => Cuboid::new(x_length.into(), y_length.into(), z_length.into()).into(),
+            } => Cuboid::new(
+                x_length.canonical().into(),
+                y_length.canonical().into(),
+                z_length.canonical().into(),
+            )
+            .into(),
         }
     }
 }
