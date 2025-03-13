@@ -2,7 +2,7 @@ use dyn_clone::DynClone;
 use villagekit_math::Vector3;
 use villagekit_number::Number;
 use villagekit_render::{Renderable, Transform};
-use villagekit_unit::Length;
+use villagekit_unit::{Angle, Length};
 
 pub trait Stock: DynClone {
     fn render(&self) -> Renderable;
@@ -69,7 +69,7 @@ impl Product {
     pub fn rotate(
         self,
         axis: Vector3<Number>,
-        angle: Number,
+        angle: Angle,
         origin: Option<Vector3<Length>>,
     ) -> Self {
         self.update_transform(|t| t.rotate(axis, angle, origin))
@@ -85,7 +85,6 @@ impl Product {
 
 #[cfg(test)]
 mod tests {
-    
 
     #[test]
     fn it_works() {

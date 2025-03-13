@@ -112,9 +112,23 @@ macro_rules! unit_type {
 
         impl $unit {
             #[inline]
-            pub fn from_scalar(value: $crate::Number) -> $dimension {
+            pub const fn from_scalar(value: $crate::Number) -> $dimension {
                 $dimension::from_scalar::<Self>(value)
             }
+
+            pub const ZERO: $dimension = Self::from_scalar(Number::ZERO);
+            pub const ONE: $dimension = Self::from_scalar(Number::ONE);
+            pub const TWO: $dimension = Self::from_scalar(Number::TWO);
+
+            pub const HALF: $dimension = Self::from_scalar(Number::HALF);
+            pub const QUARTER: $dimension = Self::from_scalar(Number::QUARTER);
+
+            pub const PI: $dimension = Self::from_scalar(Number::PI);
+            pub const FRAC_1_PI: $dimension = Self::from_scalar(Number::FRAC_1_PI);
+            pub const FRAC_2_PI: $dimension = Self::from_scalar(Number::FRAC_2_PI);
+            pub const FRAC_PI_2: $dimension = Self::from_scalar(Number::FRAC_PI_2);
+            pub const FRAC_PI_3: $dimension = Self::from_scalar(Number::FRAC_PI_3);
+            pub const FRAC_PI_4: $dimension = Self::from_scalar(Number::FRAC_PI_4);
         }
     };
 }
@@ -264,6 +278,12 @@ macro_rules! dimension {
         impl core::ops::DivAssign<$crate::Number> for $name {
             fn div_assign(&mut self, rhs: $crate::Number) {
                 self.0 = self.0.clone() / rhs;
+            }
+        }
+        impl core::ops::Neg for $name {
+            type Output = $name;
+            fn neg(self) -> $name {
+                $name(self.0.neg())
             }
         }
 

@@ -2,7 +2,7 @@ use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
 use villagekit_math::{Quaternion, Vector3};
 use villagekit_number::Number;
-use villagekit_unit::{Dimension, Length};
+use villagekit_unit::{Angle, Dimension, Length};
 
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
 pub struct Transform {
@@ -33,7 +33,7 @@ impl Transform {
     pub fn rotate(
         self,
         axis: Vector3<Number>,
-        angle: Number,
+        angle: Angle,
         origin: Option<Vector3<Length>>,
     ) -> Self {
         let origin = origin.unwrap_or_default();
@@ -62,7 +62,7 @@ impl From<Transform> for BevyTransform {
 #[cfg(test)]
 mod tests {
     use villagekit_number::{num, traits::ApproxEq};
-    use villagekit_unit::qty;
+    use villagekit_unit::{qty, Radians};
 
     use super::*;
 
@@ -100,12 +100,12 @@ mod tests {
             translation: Vector3::new(qty!(1 m), qty!(0 m), qty!(0 m)),
             rotation: Quaternion::from_axis_angle(
                 Vector3::new(num!(0), num!(1), num!(0)),
-                Number::FRAC_PI_4,
+                Radians::FRAC_PI_4,
             ),
         };
         // Apply a rotation of 90° about the z-axis.
         let axis = Vector3::new(num!(0), num!(0), num!(1));
-        let angle = Number::FRAC_PI_2;
+        let angle = Radians::FRAC_PI_2;
         let applied_rotation = Quaternion::from_axis_angle(axis, angle);
         let result = initial.apply_rotation(applied_rotation);
         let expected_rotation = initial.rotation * applied_rotation;
@@ -140,7 +140,7 @@ mod tests {
             rotation: Quaternion::default(),
         };
         let axis = Vector3::new(num!(0), num!(0), num!(1));
-        let angle = Number::FRAC_PI_2;
+        let angle = Radians::FRAC_PI_2;
         let result = initial.rotate(axis, angle, None);
         // (1,0,0) rotated about (0,0,0) by 90° should become (0,1,0)
         assert_approx_eq!(
@@ -157,7 +157,7 @@ mod tests {
             rotation: Quaternion::default(),
         };
         let axis = Vector3::new(num!(0), num!(0), num!(1));
-        let angle = Number::FRAC_PI_2;
+        let angle = Radians::FRAC_PI_2;
         let origin = Vector3::new(qty!(1 m), qty!(0 m), qty!(0 m));
         let result = initial.rotate(axis, angle, Some(origin));
         // Calculation:

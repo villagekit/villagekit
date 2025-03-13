@@ -50,7 +50,7 @@ impl Beam {
         let mut beam = Self { length }.place();
 
         if x.0 > x.1 {
-            beam = beam.rotate(Y_AXIS, HALF_ROTATION, None)
+            beam = beam.rotate(Y_AXIS, Rotations::HALF, None)
         }
 
         beam.translate(x.0, y, z)
@@ -61,10 +61,10 @@ impl Beam {
 
         let mut beam = Self { length }.place();
 
-        beam = beam.rotate(Z_AXIS, QUARTER_ROTATION, None);
+        beam = beam.rotate(Z_AXIS, Rotations::QUARTER, None);
 
         if y.0 > y.1 {
-            beam = beam.rotate(X_AXIS, HALF_ROTATION, None)
+            beam = beam.rotate(X_AXIS, Rotations::HALF, None)
         }
 
         beam.translate(x, y.0, z)
@@ -75,10 +75,10 @@ impl Beam {
 
         let mut beam = Self { length }.place();
 
-        beam = beam.rotate(Y_AXIS, -QUARTER_ROTATION, None);
+        beam = beam.rotate(Y_AXIS, -Rotations::QUARTER, None);
 
         if z.0 > z.1 {
-            beam = beam.rotate(X_AXIS, HALF_ROTATION, None)
+            beam = beam.rotate(X_AXIS, Rotations::HALF, None)
         }
 
         beam.translate(x, y, z.0)
