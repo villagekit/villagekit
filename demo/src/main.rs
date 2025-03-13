@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use villagekit_engine::{traits::*, Transform, *};
+use villagekit_engine::{Transform, *};
 
 fn main() {
     App::new()
