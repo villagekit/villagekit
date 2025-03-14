@@ -1,3 +1,17 @@
+[package]
+name = "villagekit"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+villagekit-number = { path = "./number" }
+villagekit-math = { path = "./math" }
+villagekit-product = { path = "./product" }
+villagekit-render = { path = "./render" }
+villagekit-unit = { path = "./unit" }
+villagekit-engine = { path = "./engine" }
+bevy.workspace = true
+
 [workspace]
 resolver = "2"
 members = [
@@ -20,6 +34,9 @@ dyn-clone = "1.0.18"
 glam = "0.29.2"
 num-traits = "0.2.16"
 serde = { version = "1.0.217", features = ["derive"] }
+
+[workspace.dependencies.bevy]
+version = "0.15.3"
 
 ## https://bevyengine.org/learn/quick-start/getting-started/setup/
 

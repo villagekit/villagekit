@@ -39,6 +39,12 @@ pub enum ProductKind {
     None,
 }
 
+impl ProductKind {
+    pub fn place(self) -> Product {
+        Product::new(self)
+    }
+}
+
 impl From<Option<ProductKind>> for ProductKind {
     fn from(value: Option<ProductKind>) -> Self {
         match value {
