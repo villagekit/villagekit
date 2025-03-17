@@ -34,12 +34,14 @@ where
         handle
     }
 
+    #[allow(dead_code)]
     pub fn get(&mut self, key: &K) -> Option<Handle<V>> {
         self.map.get(key).cloned()
     }
 
     /// Removes all assets from the store that are no longer strongly referenced
     /// outside of the store. (i.e., if the only strong handle is in `map`.)
+    #[allow(dead_code)]
     pub fn clean_unused(&mut self, assets: &mut Assets<V>) {
         // Collect all keys whose handle has no other strong references
         // (strong_count == 1 means only the `map` owns the strong ref).

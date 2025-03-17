@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use bevy::prelude::*;
 use villagekit_product::{Product, ProductKind};
 
