@@ -1,10 +1,16 @@
+mod color;
+mod instance;
+mod material;
+mod mesh;
 mod renderable;
 mod transform;
 
-pub use renderable::{
-    Renderable, RenderableColor, RenderableInstance, RenderableMaterial, RenderableMesh,
-};
-pub use transform::Transform;
+pub use color::*;
+pub use instance::*;
+pub use material::*;
+pub use mesh::*;
+pub use renderable::*;
+pub use transform::*;
 
 #[cfg(test)]
 mod tests {

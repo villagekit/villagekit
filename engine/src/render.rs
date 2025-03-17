@@ -1,5 +1,9 @@
 use bevy::{prelude::*, utils::HashMap};
-use villagekit_render::{Renderable, RenderableInstance, RenderableMaterial, RenderableMesh};
+use villagekit_render::{
+    Instance as RenderableInstance, Material as RenderableMaterial,
+    MaterialId as RenderableMaterialId, Mesh as RenderableMesh, MeshId as RenderableMeshId,
+    Renderable,
+};
 
 use crate::AssetStore;
 
@@ -28,8 +32,9 @@ pub(crate) fn process_renderables(
             instances,
         } = &object.0;
 
-        let mut meshes_by_id: HashMap<String, Handle<Mesh>> = HashMap::new();
-        let mut materials_by_id: HashMap<String, Handle<StandardMaterial>> = HashMap::new();
+        let mut meshes_by_id: HashMap<RenderableMeshId, Handle<Mesh>> = HashMap::new();
+        let mut materials_by_id: HashMap<RenderableMaterialId, Handle<StandardMaterial>> =
+            HashMap::new();
 
         for (id, mesh) in meshes {
             let handle = mesh_store.insert(mesh.clone(), mesh.clone().into(), &mut mesh_assets);
@@ -61,39 +66,26 @@ pub(crate) fn process_renderables(
 fn spawn_renderable_instance(
     parent: &mut ChildBuilder,
     instance: RenderableInstance,
-    meshes_by_id: &HashMap<String, Handle<Mesh>>,
-    materials_by_id: &HashMap<String, Handle<StandardMaterial>>,
+    meshes_by_id: &HashMap<RenderableMeshId, Handle<Mesh>>,
+    materials_by_id: &HashMap<RenderableMaterialId, Handle<StandardMaterial>>,
 ) {
     let mut entity = parent.spawn_empty();
 
-    if let Some(mesh_id) = instance.mesh {
-        let mesh_handle = meshes_by_id
-            .get(&mesh_id)
-            .expect("Unable to get mesh by id");
-        entity.insert(Mesh3d(mesh_handle.clone()));
-    }
+    let mesh_handle = meshes_by_id
+        .get(&instance.mesh)
+        .expect("Unable to get mesh by id");
+    entity.insert(Mesh3d(mesh_handle.clone()));
 
-    if let Some(material_id) = instance.material {
-        let material_handle = materials_by_id
-            .get(&material_id)
-            .expect("Unable to get material by id");
-        entity.insert(MeshMaterial3d(material_handle.clone()));
-    }
+    let material_handle = materials_by_id
+        .get(&instance.material)
+        .expect("Unable to get material by id");
+    entity.insert(MeshMaterial3d(material_handle.clone()));
 
-    if let Some(transform) = instance.transform {
-        entity.insert(Into::<Transform>::into(transform));
-    }
+    entity.insert(Into::<Transform>::into(instance.transform));
 
-    if let Some(children) = instance.children {
-        entity.with_children(|parent| {
-            for child_part_instance in children {
-                spawn_renderable_instance(
-                    parent,
-                    child_part_instance,
-                    meshes_by_id,
-                    materials_by_id,
-                );
-            }
-        });
-    }
+    entity.with_children(|parent| {
+        for child_part_instance in instance.children {
+            spawn_renderable_instance(parent, child_part_instance, meshes_by_id, materials_by_id);
+        }
+    });
 }

@@ -89,35 +89,36 @@ impl Stock for Beam {
     fn render(&self) -> Renderable {
         let grid_unit: Length = qty!(1 m);
 
-        Renderable::default()
-            .insert_mesh(
-                "cube".into(),
-                RenderableMesh::Cuboid {
-                    x_length: self.length,
-                    y_length: grid_unit,
-                    z_length: grid_unit,
+        let mut r = Renderable::default();
+        let cube = r.insert_mesh(
+            "cube",
+            RenderableMesh::Cuboid {
+                x_length: self.length,
+                y_length: grid_unit,
+                z_length: grid_unit,
+            },
+        );
+        let green = r.insert_material(
+            "green",
+            RenderableMaterial::Color {
+                color: RenderableColor::Hsla {
+                    hue: num!(120),
+                    saturation: num!(1),
+                    lightness: num!(0.5),
+                    alpha: num!(1),
                 },
-            )
-            .insert_material(
-                "green".into(),
-                RenderableMaterial::Color {
-                    color: RenderableColor::Hsla {
-                        hue: num!(120),
-                        saturation: num!(1),
-                        lightness: num!(0.5),
-                        alpha: num!(1),
-                    },
-                },
-            )
-            .insert_instance(RenderableInstance {
-                mesh: Some("cube".into()),
-                material: Some("green".into()),
-                transform: Some(Transform::default().translate(
-                    num!(0.5) * (self.length - grid_unit),
-                    Length::zero(),
-                    Length::zero(),
-                )),
-                children: Some(vec![]),
-            })
+            },
+        );
+        r.insert_instance(RenderableInstance {
+            mesh: cube,
+            material: green,
+            transform: Transform::default().translate(
+                num!(0.5) * (self.length - grid_unit),
+                Length::zero(),
+                Length::zero(),
+            ),
+            children: vec![],
+        });
+        r
     }
 }
