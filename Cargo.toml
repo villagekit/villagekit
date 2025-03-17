@@ -37,6 +37,7 @@ serde = { version = "1.0.217", features = ["derive"] }
 
 [workspace.dependencies.bevy]
 version = "0.15.3"
+features = ["jpeg"]
 
 ## https://bevyengine.org/learn/quick-start/getting-started/setup/
 
