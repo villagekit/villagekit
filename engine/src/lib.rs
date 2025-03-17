@@ -1,4 +1,5 @@
 use bevy::app::PostStartup;
+use bevy::image::{ImageAddressMode, ImageSamplerDescriptor};
 use bevy::prelude::{Mesh as BevyMesh, StandardMaterial as BevyStandardMaterial, *};
 use bevy_infinite_grid::InfiniteGridPlugin;
 use villagekit_product::Assembly;
@@ -22,6 +23,13 @@ impl Plugin for EnginePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
             DefaultPlugins,
+            ImagePlugin {
+                default_sampler: ImageSamplerDescriptor {
+                    address_mode_u: ImageAddressMode::Repeat,
+                    address_mode_v: ImageAddressMode::Repeat,
+                    ..Default::default()
+                },
+            },
             MeshPickingPlugin,
             bevy_editor_cam::DefaultEditorCamPlugins,
             InfiniteGridPlugin,
