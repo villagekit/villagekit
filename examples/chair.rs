@@ -101,7 +101,7 @@ impl Stock for Beam {
         let wood = r.insert_material(
             "wood",
             Material {
-                base_color_texture: Some(image!("./textures/wood.jpg")),
+                base_color_texture: Some(ImageId::new("./textures/wood.jpg")),
                 ..Default::default()
             },
         );

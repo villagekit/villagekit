@@ -42,7 +42,7 @@ pub(crate) fn process_renderables(
             meshes_by_id.insert(id.clone(), handle);
         }
 
-        let get_image = |image_id: ImageId| server.load(image_id.0);
+        let get_image = |image_id: ImageId| server.load(image_id.as_ref());
 
         for (id, material) in materials {
             let handle = material_store.insert(
