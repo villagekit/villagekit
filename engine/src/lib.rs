@@ -1,10 +1,10 @@
 use bevy::app::PostStartup;
-use bevy::prelude::*;
+use bevy::prelude::{Mesh as BevyMesh, StandardMaterial as BevyStandardMaterial, *};
 use bevy_infinite_grid::InfiniteGridPlugin;
 use villagekit_product::Assembly;
 use villagekit_product::ProductKind;
 use villagekit_product::Stock;
-use villagekit_render::{RenderableMaterial, RenderableMesh};
+use villagekit_render::{Material, Mesh};
 
 mod assets;
 mod product;
@@ -26,8 +26,8 @@ impl Plugin for EnginePlugin {
             bevy_editor_cam::DefaultEditorCamPlugins,
             InfiniteGridPlugin,
         ))
-        .insert_resource(AssetStore::<RenderableMesh, Mesh>::new())
-        .insert_resource(AssetStore::<RenderableMaterial, StandardMaterial>::new())
+        .insert_resource(AssetStore::<Mesh, BevyMesh>::new())
+        .insert_resource(AssetStore::<Material, BevyStandardMaterial>::new())
         .add_systems(Startup, setup_sandbox)
         .add_systems(Update, process_products)
         .add_systems(Update, process_renderables);

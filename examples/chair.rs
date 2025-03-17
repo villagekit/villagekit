@@ -92,26 +92,22 @@ impl Stock for Beam {
         let mut r = Renderable::default();
         let cube = r.insert_mesh(
             "cube",
-            RenderableMesh::Cuboid {
+            Mesh::Cuboid {
                 x_length: self.length,
                 y_length: grid_unit,
                 z_length: grid_unit,
             },
         );
-        let green = r.insert_material(
-            "green",
-            RenderableMaterial::Color {
-                color: RenderableColor::Hsla {
-                    hue: num!(120),
-                    saturation: num!(1),
-                    lightness: num!(0.5),
-                    alpha: num!(1),
-                },
+        let wood = r.insert_material(
+            "wood",
+            Material {
+                base_color_texture: Some(image!("./textures/wood.jpg")),
+                ..Default::default()
             },
         );
-        r.insert_instance(RenderableInstance {
+        r.insert_instance(Instance {
             mesh: cube,
-            material: green,
+            material: wood,
             transform: Transform::default().translate(
                 num!(0.5) * (self.length - grid_unit),
                 Length::zero(),

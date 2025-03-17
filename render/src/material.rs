@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use bevy_asset::Handle;
 use bevy_image::Image;
 use bevy_pbr::StandardMaterial;
@@ -7,19 +5,7 @@ use bevy_render::alpha::AlphaMode as BevyAlphaMode;
 use serde::{Deserialize, Serialize};
 use villagekit_number::Number;
 
-use crate::Color;
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ImageId(String);
-
-#[derive(Debug, Clone, Default)]
-pub struct ImageStore(BTreeMap<ImageId, Handle<Image>>);
-
-impl ImageStore {
-    pub fn get(&self, id: &ImageId) -> Option<Handle<Image>> {
-        self.0.get(id).cloned()
-    }
-}
+use crate::{Color, ImageId};
 
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub enum AlphaMode {
@@ -49,9 +35,9 @@ impl From<AlphaMode> for BevyAlphaMode {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Material {
-    base_color: Color,
-    base_color_texture: Option<ImageId>,
-    alpha_mode: AlphaMode,
+    pub base_color: Color,
+    pub base_color_texture: Option<ImageId>,
+    pub alpha_mode: AlphaMode,
 }
 
 impl Default for Material {
@@ -65,12 +51,23 @@ impl Default for Material {
 }
 
 impl Material {
-    fn material(self, images: ImageStore) -> StandardMaterial {
+    pub fn to_bevy(self, get_image: impl Fn(ImageId) -> Handle<Image>) -> StandardMaterial {
         StandardMaterial {
             base_color: self.base_color.into(),
-            base_color_texture: self.base_color_texture.and_then(|i| images.get(&i)),
+            base_color_texture: self.base_color_texture.map(get_image),
             alpha_mode: self.alpha_mode.into(),
             ..Default::default()
         }
     }
+}
+
+#[macro_export]
+macro_rules! image {
+    ($path:expr) => {{
+        let current_file = std::path::Path::new(file!());
+        let current_dir = current_file
+            .parent()
+            .expect("Failed to get parent directory of current file");
+        ImageId(current_dir.join($path))
+    }};
 }

@@ -1,6 +1,6 @@
 use bevy::{prelude::*, utils::HashMap};
 use villagekit_render::{
-    Instance as RenderableInstance, Material as RenderableMaterial,
+    ImageId, Instance as RenderableInstance, Material as RenderableMaterial,
     MaterialId as RenderableMaterialId, Mesh as RenderableMesh, MeshId as RenderableMeshId,
     Renderable,
 };
@@ -24,6 +24,7 @@ pub(crate) fn process_renderables(
     mut material_assets: ResMut<Assets<StandardMaterial>>,
     mut mesh_store: ResMut<AssetStore<RenderableMesh, Mesh>>,
     mut material_store: ResMut<AssetStore<RenderableMaterial, StandardMaterial>>,
+    server: Res<AssetServer>,
 ) {
     for (entity, object) in query.iter() {
         let Renderable {
@@ -41,10 +42,12 @@ pub(crate) fn process_renderables(
             meshes_by_id.insert(id.clone(), handle);
         }
 
+        let get_image = |image_id: ImageId| server.load(image_id.0);
+
         for (id, material) in materials {
             let handle = material_store.insert(
                 material.clone(),
-                material.clone().into(),
+                material.clone().to_bevy(get_image),
                 &mut material_assets,
             );
             materials_by_id.insert(id.clone(), handle);
