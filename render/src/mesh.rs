@@ -53,15 +53,15 @@ impl Mesh {
                             // Right face: lies in the Y–Z plane.
                             // Use z_length for U and y_length for V.
                             8 => [0.0, 0.0],
-                            9 => [0.0, y_length],
+                            9 => [z_length, 0.0],
                             10 => [z_length, y_length],
-                            11 => [z_length, 0.0],
+                            11 => [0.0, y_length],
                             // Left face: also in the Y–Z plane.
                             // Vertex order is reversed compared to the right face.
                             12 => [z_length, 0.0],
-                            13 => [z_length, y_length],
+                            13 => [0.0, 0.0],
                             14 => [0.0, y_length],
-                            15 => [0.0, 0.0],
+                            15 => [z_length, y_length],
                             // Top face: lies in the X–Z plane.
                             // Use x_length for U and z_length for V.
                             16 => [x_length, 0.0],
@@ -70,10 +70,10 @@ impl Mesh {
                             19 => [x_length, z_length],
                             // Bottom face: also in the X–Z plane.
                             // Here we flip the V mapping relative to the top.
-                            20 => [x_length, z_length],
-                            21 => [0.0, z_length],
-                            22 => [0.0, 0.0],
-                            23 => [x_length, 0.0],
+                            20 => [0.0, 0.0],
+                            21 => [x_length, 0.0],
+                            22 => [x_length, z_length],
+                            23 => [0.0, z_length],
                             _ => unreachable!(),
                         }
                     }
