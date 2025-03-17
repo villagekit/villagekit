@@ -6,11 +6,14 @@ use fastnum::{
     D128,
 };
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Display};
+use std::{
+    fmt::{Debug, Display},
+    hash::Hash,
+};
 
 pub use crate::traits::*;
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Number(pub D128);
 
 impl Number {
@@ -30,6 +33,7 @@ impl Number {
     pub const FRAC_PI_3: Number = Number(Decimal::FRAC_PI_3);
     pub const FRAC_PI_4: Number = Number(Decimal::FRAC_PI_4);
 
+    pub const INFINITY: Number = Number(Decimal::INFINITY);
     pub const EPSILON: Number = Number(Decimal::EPSILON);
 
     pub fn parse(s: &str) -> Result<Self, ParseError> {
@@ -66,6 +70,25 @@ impl From<Number> for f32 {
 impl Default for Number {
     fn default() -> Self {
         Self::ZERO
+    }
+}
+
+// Special hash function to handle infinities and NaN,
+//   which fastnum doesn't do.
+impl Hash for Number {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        let n = self.0;
+        if n.is_infinite() {
+            if n.is_positive() {
+                "positive-infinity".hash(state)
+            } else {
+                "negative-infinity".hash(state)
+            }
+        } else if n.is_nan() {
+            "not-a-number".hash(state)
+        } else {
+            n.hash(state)
+        }
     }
 }
 

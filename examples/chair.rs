@@ -102,6 +102,9 @@ impl Stock for Beam {
             "wood",
             Material {
                 base_color_texture: Some(ImageId::new("./textures/wood.jpg")),
+                normal_map_texture: Some(ImageId::new("./textures/wood-normals.jpg")),
+                metallic: num!(0),
+                perceptual_roughness: num!(0.7),
                 ..Default::default()
             },
         );
