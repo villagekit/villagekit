@@ -1,5 +1,5 @@
 use bevy_math::prelude::Cuboid;
-use bevy_render::mesh::Mesh as BevyMesh;
+use bevy_render::mesh::{Mesh as BevyMesh, VertexAttributeValues};
 use serde::{Deserialize, Serialize};
 use villagekit_unit::{Dimension, Length};
 
@@ -26,12 +26,61 @@ impl Mesh {
                 x_length,
                 y_length,
                 z_length,
-            } => Cuboid::new(
-                x_length.canonical().into(),
-                y_length.canonical().into(),
-                z_length.canonical().into(),
-            )
-            .into(),
+            } => {
+                let x_length = x_length.canonical().into();
+                let y_length = y_length.canonical().into();
+                let z_length = z_length.canonical().into();
+                let mut mesh: BevyMesh = Cuboid::new(x_length, y_length, z_length).into();
+
+                // Map UVs from (0, 0) -> (1, 1) to world units
+                if let Some(VertexAttributeValues::Float32x2(ref mut uvs)) =
+                    mesh.attribute_mut(BevyMesh::ATTRIBUTE_UV_0)
+                {
+                    for (i, uv) in uvs.iter_mut().enumerate() {
+                        *uv = match i {
+                            // Front face: lies in the X–Y plane.
+                            // Use x_length for U and y_length for V.
+                            0 => [0.0, 0.0],
+                            1 => [x_length, 0.0],
+                            2 => [x_length, y_length],
+                            3 => [0.0, y_length],
+                            // Back face: also spans X–Y.
+                            // Note: the vertex order is reversed compared to the front.
+                            4 => [x_length, 0.0],
+                            5 => [0.0, 0.0],
+                            6 => [0.0, y_length],
+                            7 => [x_length, y_length],
+                            // Right face: lies in the Y–Z plane.
+                            // Use z_length for U and y_length for V.
+                            8 => [0.0, 0.0],
+                            9 => [0.0, y_length],
+                            10 => [z_length, y_length],
+                            11 => [z_length, 0.0],
+                            // Left face: also in the Y–Z plane.
+                            // Vertex order is reversed compared to the right face.
+                            12 => [z_length, 0.0],
+                            13 => [z_length, y_length],
+                            14 => [0.0, y_length],
+                            15 => [0.0, 0.0],
+                            // Top face: lies in the X–Z plane.
+                            // Use x_length for U and z_length for V.
+                            16 => [x_length, 0.0],
+                            17 => [0.0, 0.0],
+                            18 => [0.0, z_length],
+                            19 => [x_length, z_length],
+                            // Bottom face: also in the X–Z plane.
+                            // Here we flip the V mapping relative to the top.
+                            20 => [x_length, z_length],
+                            21 => [0.0, z_length],
+                            22 => [0.0, 0.0],
+                            23 => [x_length, 0.0],
+                            _ => unreachable!(),
+                        }
+                    }
+                }
+
+                mesh
+            }
         }
     }
 }

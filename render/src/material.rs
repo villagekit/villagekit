@@ -60,14 +60,3 @@ impl Material {
         }
     }
 }
-
-#[macro_export]
-macro_rules! image {
-    ($path:expr) => {{
-        let current_file = std::path::Path::new(file!());
-        let current_dir = current_file
-            .parent()
-            .expect("Failed to get parent directory of current file");
-        ImageId(current_dir.join($path))
-    }};
-}
