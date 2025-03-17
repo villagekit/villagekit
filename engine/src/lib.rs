@@ -22,14 +22,13 @@ pub struct EnginePlugin;
 impl Plugin for EnginePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
-            DefaultPlugins,
-            ImagePlugin {
+            DefaultPlugins.set(ImagePlugin {
                 default_sampler: ImageSamplerDescriptor {
                     address_mode_u: ImageAddressMode::Repeat,
                     address_mode_v: ImageAddressMode::Repeat,
                     ..Default::default()
                 },
-            },
+            }),
             MeshPickingPlugin,
             bevy_editor_cam::DefaultEditorCamPlugins,
             InfiniteGridPlugin,
