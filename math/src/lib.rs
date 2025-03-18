@@ -1,9 +1,15 @@
+mod affine2;
 mod constants;
+mod matrix2;
 mod quaternion;
+mod vector2;
 mod vector3;
 
+pub use affine2::*;
 pub use constants::*;
+pub use matrix2::*;
 pub use quaternion::*;
+pub use vector2::*;
 pub use vector3::*;
 
 #[cfg(test)]

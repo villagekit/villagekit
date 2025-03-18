@@ -22,6 +22,7 @@ pub(crate) fn setup_sandbox(mut commands: Commands) {
     commands.spawn((InfiniteGridBundle {
         settings: InfiniteGridSettings {
             fadeout_distance: 1000.,
+            scale: 100.,
             ..Default::default()
         },
         ..Default::default()

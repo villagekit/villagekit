@@ -2,18 +2,18 @@ use villagekit::prelude::*;
 
 fn main() {
     let chair = Chair {
-        width: qty!(10 m),
-        depth: qty!(10 m),
-        height: qty!(10 m),
+        width: num!(10),
+        depth: num!(10),
+        height: num!(10),
     };
     setup_assembly(chair);
 }
 
 #[derive(Clone)]
 struct Chair {
-    width: Length,
-    depth: Length,
-    height: Length,
+    width: Number,
+    depth: Number,
+    height: Number,
 }
 
 impl Assembly for Chair {
@@ -25,26 +25,28 @@ impl Assembly for Chair {
         } = *self;
 
         vec![
-            Beam::z(qty!(0 m), qty!(0 m), (qty!(0 m), height)),
-            Beam::z(width - qty!(1 m), qty!(0 m), (qty!(0 m), height)),
-            Beam::z(qty!(0 m), depth - qty!(1 m), (qty!(0 m), height)),
-            Beam::z(width - qty!(1 m), depth - qty!(1 m), (qty!(0 m), height)),
-            Beam::x((qty!(0 m), width), qty!(1 m), height - qty!(2 m)),
-            Beam::x((qty!(0 m), width), depth - qty!(2 m), height - qty!(2 m)),
-            Beam::y(qty!(1 m), (qty!(0 m), depth), height - qty!(1 m)),
-            Beam::y(width - qty!(2 m), (qty!(0 m), depth), height - qty!(1 m)),
+            GridBeam::z(num!(0), num!(0), (num!(0), height)),
+            GridBeam::z(width - num!(1), num!(0), (num!(0), height)),
+            GridBeam::z(num!(0), depth - num!(1), (num!(0), height)),
+            GridBeam::z(width - num!(1), depth - num!(1), (num!(0), height)),
+            GridBeam::x((num!(0), width), num!(1), height - num!(2)),
+            GridBeam::x((num!(0), width), depth - num!(2), height - num!(2)),
+            GridBeam::y(num!(1), (num!(0), depth), height - num!(1)),
+            GridBeam::y(width - num!(2), (num!(0), depth), height - num!(1)),
         ]
     }
 }
 
 // TODO Add support for variants with custom grid units.
 #[derive(Clone)]
-struct Beam {
-    length: Length,
+struct GridBeam {
+    length: Number,
 }
 
-impl Beam {
-    fn x(x: (Length, Length), y: Length, z: Length) -> Product {
+impl GridBeam {
+    const GRID_UNIT: Length = qty!(40 mm);
+
+    fn x(x: (Number, Number), y: Number, z: Number) -> Product {
         let length = (x.0 - x.1).abs();
 
         let mut beam = Self { length }.place();
@@ -53,10 +55,14 @@ impl Beam {
             beam = beam.rotate(Y_AXIS, Rotations::HALF, None)
         }
 
-        beam.translate(x.0, y, z)
+        beam.translate(
+            x.0 * Self::GRID_UNIT,
+            y * Self::GRID_UNIT,
+            z * Self::GRID_UNIT,
+        )
     }
 
-    fn y(x: Length, y: (Length, Length), z: Length) -> Product {
+    fn y(x: Number, y: (Number, Number), z: Number) -> Product {
         let length = (y.0 - y.1).abs();
 
         let mut beam = Self { length }.place();
@@ -67,10 +73,14 @@ impl Beam {
             beam = beam.rotate(X_AXIS, Rotations::HALF, None)
         }
 
-        beam.translate(x, y.0, z)
+        beam.translate(
+            x * Self::GRID_UNIT,
+            y.0 * Self::GRID_UNIT,
+            z * Self::GRID_UNIT,
+        )
     }
 
-    fn z(x: Length, y: Length, z: (Length, Length)) -> Product {
+    fn z(x: Number, y: Number, z: (Number, Number)) -> Product {
         let length = (z.0 - z.1).abs();
 
         let mut beam = Self { length }.place();
@@ -81,21 +91,23 @@ impl Beam {
             beam = beam.rotate(X_AXIS, Rotations::HALF, None)
         }
 
-        beam.translate(x, y, z.0)
+        beam.translate(
+            x * Self::GRID_UNIT,
+            y * Self::GRID_UNIT,
+            z.0 * Self::GRID_UNIT,
+        )
     }
 }
 
-impl Stock for Beam {
+impl Stock for GridBeam {
     fn render(&self) -> Renderable {
-        let grid_unit: Length = qty!(1 m);
-
         let mut r = Renderable::default();
         let cube = r.insert_mesh(
             "cube",
             Mesh::Cuboid {
-                x_length: self.length,
-                y_length: grid_unit,
-                z_length: grid_unit,
+                x_length: self.length * Self::GRID_UNIT,
+                y_length: Self::GRID_UNIT,
+                z_length: Self::GRID_UNIT,
             },
         );
         let wood = r.insert_material(
@@ -105,6 +117,8 @@ impl Stock for Beam {
                 normal_map_texture: Some(ImageId::new("./textures/wood-normals.jpg")),
                 metallic: num!(0),
                 perceptual_roughness: num!(0.7),
+                // Repeat texture every 2.5 meters
+                uv_transform: Affine2::from_scale(Vector2::new(num!(0.4), num!(0.4))),
                 ..Default::default()
             },
         );
@@ -112,7 +126,7 @@ impl Stock for Beam {
             mesh: cube,
             material: wood,
             transform: Transform::default().translate(
-                num!(0.5) * (self.length - grid_unit),
+                num!(0.5) * (self.length - num!(1)) * Self::GRID_UNIT,
                 Length::zero(),
                 Length::zero(),
             ),

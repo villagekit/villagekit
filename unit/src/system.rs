@@ -224,6 +224,14 @@ mod tests {
     }
 
     #[test]
+    fn test_qty_conversions() {
+        // qty!(2000 mm) should be equal to Length::from_scalar::<Meters>(num!(1))
+        let length = qty!(2000 mm);
+        let expected = Length::from_scalar::<Meters>(num!(2));
+        assert_eq!(length, expected);
+    }
+
+    #[test]
     fn test_qty_type() {
         // qty!(1 Meters) should be equal to Length::from_scalar::<Meters>(num!(1))
         let length_m = qty!(1.0 Meters);

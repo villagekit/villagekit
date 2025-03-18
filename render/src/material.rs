@@ -7,6 +7,7 @@ use bevy_pbr::{
 };
 use bevy_render::{alpha::AlphaMode as BevyAlphaMode, render_resource::Face as BevyFace};
 use serde::{Deserialize, Serialize};
+use villagekit_math::Affine2;
 use villagekit_number::Number;
 use villagekit_unit::num;
 
@@ -68,6 +69,8 @@ pub struct Material {
     pub lightmap_exposure: Number,
     pub opaque_render_method: OpaqueRendererMethod,
     pub deferred_lighting_pass_id: u8,
+
+    pub uv_transform: Affine2<Number>,
 }
 
 impl Default for Material {
@@ -113,6 +116,7 @@ impl Default for Material {
             lightmap_exposure: num!(1.0),
             opaque_render_method: OpaqueRendererMethod::Forward,
             deferred_lighting_pass_id: 0,
+            uv_transform: Affine2::identity(),
         }
     }
 }
@@ -162,7 +166,7 @@ impl Material {
             lightmap_exposure: self.lightmap_exposure.into(),
             opaque_render_method: self.opaque_render_method.into(),
             deferred_lighting_pass_id: self.deferred_lighting_pass_id,
-            ..Default::default()
+            uv_transform: self.uv_transform.into(),
         }
     }
 }

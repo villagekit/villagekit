@@ -13,7 +13,7 @@ pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<Gizm
     // Key Light: brighter, casting the main shadows.
     commands.spawn((
         PointLight {
-            intensity: 1_500_000_f32,
+            intensity: 1_000_000_f32,
             shadows_enabled: true,
             ..default()
         },
@@ -23,7 +23,7 @@ pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<Gizm
     // Fill Light: softer, helping to lift shadows.
     commands.spawn((
         PointLight {
-            intensity: 1_000_000_f32,
+            intensity: 600_000_f32,
             shadows_enabled: false,
             ..default()
         },
@@ -33,7 +33,7 @@ pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<Gizm
     // Rim Light: adds a highlight to the edges.
     commands.spawn((
         PointLight {
-            intensity: 500_000_f32,
+            intensity: 400_000_f32,
             shadows_enabled: false,
             ..default()
         },
@@ -41,10 +41,11 @@ pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<Gizm
     ));
 
     // Extra lights
-    let num_extra_lights = 6;
+    let num_extra_lights = 0;
     for _light_index in 0..num_extra_lights {
         commands.spawn((
             PointLight {
+                intensity: 300_000_f32,
                 shadows_enabled: true,
                 ..default()
             },
@@ -87,8 +88,8 @@ pub(crate) fn update_lights(
 
     let center = 0.5_f32 * (min + max);
     let extent = max - min;
-    let radius = 0.5_f32 * extent.length() + 5.0;
-    let range = 3_f32 * extent.length();
+    let radius = 0.6_f32 * extent.length() + 2_f32;
+    let range = 2_f32 * radius;
     let num_extra_lights = light_query.iter().len();
 
     // Update the positions of the studio lights around the bounding box.

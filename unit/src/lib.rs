@@ -151,7 +151,7 @@ macro_rules! unit {
             impl $crate::UnitOf for $unit {
                 type Dim = $dimension;
 
-                const CONVERSION_COEFFICIENT: $crate::Number = $crate::num!($rhsper);
+                const CONVERSION_COEFFICIENT: $crate::Number = $crate::num!(1).div($crate::num!($rhsper));
                 const CONVERSION_CONSTANT: $crate::Number = $crate::num!(0);
             }
         )?
