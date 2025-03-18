@@ -35,9 +35,11 @@ impl Plugin for EnginePlugin {
         ))
         .insert_resource(AssetStore::<Mesh, BevyMesh>::new())
         .insert_resource(AssetStore::<Material, BevyStandardMaterial>::new())
-        .add_systems(Startup, setup_sandbox)
-        .add_systems(Update, process_products)
-        .add_systems(Update, process_renderables);
+        .add_systems(Startup, (setup_sandbox, setup_lights))
+        .add_systems(
+            Update,
+            (update_lights, process_products, process_renderables),
+        );
     }
 }
 
