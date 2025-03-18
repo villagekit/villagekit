@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use super::Sandbox;
+use super::SandboxBounds;
 
 #[derive(Component)]
-pub(crate) struct StudioLight;
+pub(crate) struct SandboxLight;
 
 pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<GizmoConfigStore>) {
     let (_, light_config) = config_store.config_mut::<LightGizmoConfigGroup>();
@@ -17,7 +17,7 @@ pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<Gizm
             shadows_enabled: true,
             ..default()
         },
-        StudioLight,
+        SandboxLight,
     ));
 
     // Fill Light: softer, helping to lift shadows.
@@ -27,7 +27,7 @@ pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<Gizm
             shadows_enabled: false,
             ..default()
         },
-        StudioLight,
+        SandboxLight,
     ));
 
     // Rim Light: adds a highlight to the edges.
@@ -37,7 +37,7 @@ pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<Gizm
             shadows_enabled: false,
             ..default()
         },
-        StudioLight,
+        SandboxLight,
     ));
 
     // Extra lights
@@ -49,45 +49,20 @@ pub(crate) fn setup_lights(mut commands: Commands, mut config_store: ResMut<Gizm
                 shadows_enabled: true,
                 ..default()
             },
-            StudioLight,
+            SandboxLight,
         ));
     }
 }
 
-/// Each frame, this system calculates the axis–aligned bounding box for all entities
-/// that are descendants of the Sandbox entity, and then repositions the studio lights around that bounding box.
 pub(crate) fn update_lights(
-    sandbox_query: Query<Entity, With<Sandbox>>,
-    children_query: Query<&Children>,
-    transform_query: Query<&GlobalTransform>,
-    mut light_query: Query<(&mut PointLight, &mut Transform), With<StudioLight>>,
+    sandbox_bounds: Res<SandboxBounds>,
+    mut light_query: Query<(&mut PointLight, &mut Transform), With<SandboxLight>>,
 ) {
-    // For simplicity, assume there is a single Sandbox entity.
-    let sandbox_entity = match sandbox_query.get_single() {
-        Ok(entity) => entity,
-        Err(_) => return,
-    };
-
-    // Collect all descendant entities of the sandbox.
-    let descendant_entities = collect_descendants(sandbox_entity, &children_query);
-
-    if descendant_entities.is_empty() {
+    if !sandbox_bounds.is_changed() {
         return;
-    }
+    };
+    let SandboxBounds { center, extent } = sandbox_bounds.as_ref();
 
-    // Compute the bounding box of all descendant entities.
-    let mut min = Vec3::splat(f32::INFINITY);
-    let mut max = Vec3::splat(f32::NEG_INFINITY);
-    for entity in descendant_entities {
-        if let Ok(global_transform) = transform_query.get(entity) {
-            let pos = global_transform.translation();
-            min = min.min(pos);
-            max = max.max(pos);
-        }
-    }
-
-    let center = 0.5_f32 * (min + max);
-    let extent = max - min;
     let radius = 0.6_f32 * extent.length() + 2_f32;
     let range = 2_f32 * radius;
     let num_extra_lights = light_query.iter().len();
@@ -122,16 +97,4 @@ pub(crate) fn update_lights(
             }
         }
     }
-}
-
-/// Recursively collects all descendant entities of a given parent.
-fn collect_descendants(entity: Entity, children_query: &Query<&Children>) -> Vec<Entity> {
-    let mut descendants = Vec::new();
-    if let Ok(children) = children_query.get(entity) {
-        for &child in children.iter() {
-            descendants.push(child);
-            descendants.extend(collect_descendants(child, children_query));
-        }
-    }
-    descendants
 }
