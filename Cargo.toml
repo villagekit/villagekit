@@ -15,7 +15,6 @@ bevy.workspace = true
 [workspace]
 resolver = "2"
 members = [
-  "demo",
   "engine",
   "math",
   "number",
