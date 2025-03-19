@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::HashMap};
+use bevy::{math::bounding::Aabb3d, prelude::*, utils::HashMap};
 use villagekit_render::{
     ImageId, Instance as RenderableInstance, Material as RenderableMaterial,
     MaterialId as RenderableMaterialId, Mesh as RenderableMesh, MeshId as RenderableMeshId,
@@ -10,6 +10,9 @@ use crate::AssetStore;
 #[derive(Component)]
 #[require(Transform, Visibility)]
 pub(crate) struct RenderableObject(pub Renderable);
+
+#[derive(Component)]
+pub(crate) struct RenderableBounds(Aabb3d);
 
 pub fn spawn_renderable(parent: Entity, renderable: Renderable, commands: &mut Commands) {
     commands.entity(parent).with_children(|p| {
@@ -85,6 +88,9 @@ fn spawn_renderable_instance(
     entity.insert(MeshMaterial3d(material_handle.clone()));
 
     entity.insert(Into::<Transform>::into(instance.transform));
+
+    let bounds = 0;
+    entity.insert(RenderableBounds(bounds));
 
     entity.with_children(|parent| {
         for child_part_instance in instance.children {

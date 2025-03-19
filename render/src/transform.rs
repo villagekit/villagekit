@@ -1,8 +1,12 @@
+use bevy_math::{Isometry3d, Vec3};
 use bevy_transform::components::Transform as BevyTransform;
 use serde::{Deserialize, Serialize};
 use villagekit_math::{Quaternion, Vector3};
 use villagekit_number::Number;
 use villagekit_unit::{Angle, Dimension, Length};
+
+// TODO this is the same as https://docs.rs/bevy/latest/bevy/prelude/struct.Isometry3d.html
+//   So maybe should be renamed?
 
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]
 pub struct Transform {
@@ -59,6 +63,17 @@ impl From<Transform> for BevyTransform {
         }
     }
 }
+
+impl From<Transform> for Isometry3d {
+    fn from(value: Transform) -> Self {
+        let translation_vec3: Vec3 = value.translation.map(|v| v.canonical()).into();
+        Isometry3d {
+            translation: translation_vec3.into(),
+            rotation: value.rotation.into(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use villagekit_number::{num, traits::ApproxEq};

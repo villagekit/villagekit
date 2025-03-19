@@ -13,6 +13,15 @@ use villagekit_unit::num;
 
 use crate::{Color, ImageId};
 
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct MaterialId(String);
+
+impl MaterialId {
+    pub fn new(key: &str) -> Self {
+        Self(key.into())
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Material {
     pub base_color: Color,
