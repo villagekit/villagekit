@@ -1,8 +1,8 @@
 use bevy::{math::bounding::Aabb3d, prelude::*, utils::HashMap};
 use villagekit_render::{
     ImageId, Instance as RenderableInstance, Material as RenderableMaterial,
-    MaterialId as RenderableMaterialId, Mesh as RenderableMesh, MeshId as RenderableMeshId,
-    Renderable,
+    MaterialId as RenderableMaterialId, Renderable, Shape, ShapeEnum as RenderableShape,
+    ShapeId as RenderableShapeId,
 };
 
 use crate::AssetStore;
@@ -25,23 +25,25 @@ pub(crate) fn process_renderables(
     query: Query<(Entity, &RenderableObject), Added<RenderableObject>>,
     mut mesh_assets: ResMut<Assets<Mesh>>,
     mut material_assets: ResMut<Assets<StandardMaterial>>,
-    mut mesh_store: ResMut<AssetStore<RenderableMesh, Mesh>>,
+    mut mesh_store: ResMut<AssetStore<RenderableShape, Mesh>>,
     mut material_store: ResMut<AssetStore<RenderableMaterial, StandardMaterial>>,
     server: Res<AssetServer>,
 ) {
     for (entity, object) in query.iter() {
         let Renderable {
-            meshes,
+            shapes,
             materials,
             instances,
         } = &object.0;
 
-        let mut meshes_by_id: HashMap<RenderableMeshId, Handle<Mesh>> = HashMap::new();
+        let mut shapes_by_id: HashMap<RenderableShapeId, RenderableShape> = HashMap::new();
+        let mut meshes_by_id: HashMap<RenderableShapeId, Handle<Mesh>> = HashMap::new();
         let mut materials_by_id: HashMap<RenderableMaterialId, Handle<StandardMaterial>> =
             HashMap::new();
 
-        for (id, mesh) in meshes {
-            let handle = mesh_store.insert(mesh.clone(), mesh.clone().into(), &mut mesh_assets);
+        for (id, shape) in shapes {
+            shapes_by_id.insert(id.clone(), shape.clone());
+            let handle = mesh_store.insert(shape.clone(), shape.mesh(), &mut mesh_assets);
             meshes_by_id.insert(id.clone(), handle);
         }
 
@@ -61,6 +63,7 @@ pub(crate) fn process_renderables(
                 spawn_renderable_instance(
                     parent,
                     instance.clone(),
+                    &shapes_by_id,
                     &meshes_by_id,
                     &materials_by_id,
                 );
@@ -72,13 +75,14 @@ pub(crate) fn process_renderables(
 fn spawn_renderable_instance(
     parent: &mut ChildBuilder,
     instance: RenderableInstance,
-    meshes_by_id: &HashMap<RenderableMeshId, Handle<Mesh>>,
+    shapes_by_id: &HashMap<RenderableShapeId, RenderableShape>,
+    meshes_by_id: &HashMap<RenderableShapeId, Handle<Mesh>>,
     materials_by_id: &HashMap<RenderableMaterialId, Handle<StandardMaterial>>,
 ) {
     let mut entity = parent.spawn_empty();
 
     let mesh_handle = meshes_by_id
-        .get(&instance.mesh)
+        .get(&instance.shape)
         .expect("Unable to get mesh by id");
     entity.insert(Mesh3d(mesh_handle.clone()));
 
@@ -89,12 +93,21 @@ fn spawn_renderable_instance(
 
     entity.insert(Into::<Transform>::into(instance.transform));
 
-    let bounds = 0;
+    let shape = shapes_by_id
+        .get(&instance.shape)
+        .expect("Unable to get shape by id");
+    let bounds = shape.bounds(instance.transform);
     entity.insert(RenderableBounds(bounds));
 
     entity.with_children(|parent| {
         for child_part_instance in instance.children {
-            spawn_renderable_instance(parent, child_part_instance, meshes_by_id, materials_by_id);
+            spawn_renderable_instance(
+                parent,
+                child_part_instance,
+                shapes_by_id,
+                meshes_by_id,
+                materials_by_id,
+            );
         }
     });
 }

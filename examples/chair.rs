@@ -102,9 +102,9 @@ impl GridBeam {
 impl Stock for GridBeam {
     fn render(&self) -> Renderable {
         let mut r = Renderable::default();
-        let cube = r.insert_mesh(
+        let cube = r.insert_shape(
             "cube",
-            Mesh::Cuboid {
+            Cuboid {
                 x_length: self.length * Self::GRID_UNIT,
                 y_length: Self::GRID_UNIT,
                 z_length: Self::GRID_UNIT,
@@ -123,7 +123,7 @@ impl Stock for GridBeam {
             },
         );
         r.insert_instance(Instance {
-            mesh: cube,
+            shape: cube,
             material: wood,
             transform: Transform::default().translate(
                 num!(0.5) * (self.length - num!(1)) * Self::GRID_UNIT,

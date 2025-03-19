@@ -4,30 +4,38 @@ use bevy_math::{
     Isometry3d,
 };
 use bevy_render::mesh::{Mesh, Meshable, VertexAttributeValues};
+use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 use villagekit_unit::{Dimension, Length};
 
 use crate::Transform;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Shape3dId(String);
+pub struct ShapeId(String);
 
-impl Shape3dId {
+impl ShapeId {
     pub fn new(key: &str) -> Self {
         Self(key.into())
     }
 }
 
-pub trait Shape3d {
+#[enum_dispatch(ShapeEnum)]
+pub trait Shape: Into<ShapeEnum> {
     fn mesh(&self) -> Mesh;
     fn bounds(&self, transform: Transform) -> Aabb3d;
 }
 
+#[enum_dispatch]
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-struct Cuboid {
-    x_length: Length,
-    y_length: Length,
-    z_length: Length,
+pub enum ShapeEnum {
+    Cuboid(Cuboid),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
+pub struct Cuboid {
+    pub x_length: Length,
+    pub y_length: Length,
+    pub z_length: Length,
 }
 
 impl Cuboid {
@@ -40,7 +48,7 @@ impl Cuboid {
     }
 }
 
-impl Shape3d for Cuboid {
+impl Shape for Cuboid {
     fn mesh(&self) -> Mesh {
         let x_length = self.x_length.canonical().into();
         let y_length = self.y_length.canonical().into();

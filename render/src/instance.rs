@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{MaterialId, Shape3dId, Transform};
+use crate::{MaterialId, ShapeId, Transform};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Instance {
-    pub mesh: Shape3dId,
+    pub shape: ShapeId,
     pub material: MaterialId,
     #[serde(default)]
     pub transform: Transform,

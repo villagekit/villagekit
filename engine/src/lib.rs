@@ -1,11 +1,11 @@
 use bevy::app::PostStartup;
 use bevy::image::{ImageAddressMode, ImageSamplerDescriptor};
-use bevy::prelude::{Mesh as BevyMesh, StandardMaterial as BevyStandardMaterial, *};
+use bevy::prelude::{Mesh as BevyMesh, StandardMaterial as BevyMaterial, *};
 use bevy_infinite_grid::InfiniteGridPlugin;
 use villagekit_product::Assembly;
 use villagekit_product::ProductKind;
 use villagekit_product::Stock;
-use villagekit_render::{Material, Mesh};
+use villagekit_render::{Material, ShapeEnum};
 
 mod assets;
 mod product;
@@ -33,8 +33,8 @@ impl Plugin for EnginePlugin {
             bevy_editor_cam::DefaultEditorCamPlugins,
             InfiniteGridPlugin,
         ))
-        .insert_resource(AssetStore::<Mesh, BevyMesh>::new())
-        .insert_resource(AssetStore::<Material, BevyStandardMaterial>::new())
+        .insert_resource(AssetStore::<ShapeEnum, BevyMesh>::new())
+        .insert_resource(AssetStore::<Material, BevyMaterial>::new())
         .insert_resource(SandboxBounds::default())
         .add_systems(Startup, (setup_sandbox, setup_lights, setup_camera))
         .add_systems(
