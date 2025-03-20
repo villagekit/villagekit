@@ -1,8 +1,5 @@
-use bevy::{math::bounding::Aabb3d, prelude::*, utils::HashMap};
-use std::{
-    borrow::BorrowMut,
-    sync::{Arc, Weak},
-};
+use bevy::{prelude::*, utils::HashMap};
+use std::sync::Arc;
 use villagekit_render::{
     ImageId, Instance as RenderableInstance, Material as RenderableMaterial,
     MaterialId as RenderableMaterialId, Renderable, Shape, ShapeEnum as RenderableShape,
@@ -16,27 +13,19 @@ use crate::AssetStore;
 pub(crate) struct RenderableObject(pub Renderable);
 
 #[derive(Resource)]
-pub(crate) struct ShapesById(pub HashMap<RenderableShapeId, Weak<RenderableShape>>);
+pub(crate) struct ShapesById(pub HashMap<RenderableShapeId, Arc<RenderableShape>>);
 
 impl ShapesById {
     pub fn new() -> Self {
         Self(HashMap::new())
     }
 
-    // Insert by taking a strong reference (Arc<T>) and storing a Weak<T>.
-    pub fn insert(&mut self, key: RenderableShapeId, value: Arc<RenderableShape>) {
-        let weak = Arc::downgrade(&value);
-        self.0.insert(key, weak);
+    pub fn insert(&mut self, key: RenderableShapeId, value: RenderableShape) {
+        self.0.insert(key, Arc::new(value));
     }
 
-    // Attempt to get a strong reference (Arc<T>) back by upgrading the Weak<T>.
-    // If upgrade() fails, it means the value is already dropped.
     pub fn get(&self, key: &RenderableShapeId) -> Option<Arc<RenderableShape>> {
-        self.0.get(key).and_then(|weak_ref| weak_ref.upgrade())
-    }
-
-    pub fn retain_alive(&mut self) {
-        self.0.retain(|_, weak_ref| weak_ref.upgrade().is_some());
+        self.0.get(key).cloned()
     }
 }
 
@@ -72,7 +61,7 @@ pub(crate) fn process_renderables(
             HashMap::new();
 
         for (id, shape) in shapes {
-            shapes_by_id.insert(id.clone(), shape.clone().into());
+            shapes_by_id.insert(id.clone(), shape.clone());
             let mesh_handle = mesh_store.insert(shape.clone(), shape.mesh(), &mut mesh_assets);
             meshes_by_id.insert(id.clone(), mesh_handle);
         }
