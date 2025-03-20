@@ -117,8 +117,8 @@ impl Stock for GridBeam {
                 normal_map_texture: Some(ImageId::new("./textures/wood-normals.jpg")),
                 metallic: num!(0),
                 perceptual_roughness: num!(0.7),
-                // Repeat texture every 2.5 meters
-                uv_transform: Affine2::from_scale(Vector2::new(num!(0.4), num!(0.4))),
+                // Repeat texture every 0.4 meters
+                uv_transform: Affine2::from_scale(Vector2::new(num!(2.5), num!(2.5))),
                 ..Default::default()
             },
         );
