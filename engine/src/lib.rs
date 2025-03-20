@@ -38,11 +38,10 @@ impl Plugin for EnginePlugin {
         .insert_resource(AssetStore::<Material, BevyMaterial>::new())
         .insert_resource(SandboxBounds::default())
         .add_systems(Startup, (setup_sandbox, setup_lights, setup_camera))
+        .add_systems(Update, update_sandbox_bounds)
         .add_systems(
             Update,
-            update_sandbox_bounds
-                .before(update_lights)
-                .before(update_camera),
+            (update_lights, update_camera).run_if(resource_changed::<SandboxBounds>),
         )
         .add_systems(Update, (process_products, process_renderables));
     }

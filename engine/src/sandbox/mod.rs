@@ -82,14 +82,15 @@ pub(crate) fn update_sandbox_bounds(
     }
 
     let center = sandbox_bounds.center();
-    let extent = sandbox_bounds.min - sandbox_bounds.max;
+    let extent = sandbox_bounds.max - sandbox_bounds.min;
 
     if !extent.is_finite() {
         return;
     };
 
     if current_sandbox_bounds.center != center || current_sandbox_bounds.extent != extent {
-        current_sandbox_bounds.center = center;
-        current_sandbox_bounds.extent = extent;
+        let b = current_sandbox_bounds.as_mut();
+        b.center = center;
+        b.extent = extent;
     }
 }

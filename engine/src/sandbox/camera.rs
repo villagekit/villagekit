@@ -20,18 +20,13 @@ pub(crate) fn update_camera(
     sandbox_bounds: Res<SandboxBounds>,
     mut camera_query: Query<(&mut Camera3d, &mut Transform), With<SandboxCamera>>,
 ) {
-    if !sandbox_bounds.is_changed() {
-        return;
-    };
     let SandboxBounds { center, extent } = sandbox_bounds.as_ref();
     let center = Vec3::from(*center);
-
-    println!("center: {}", center);
 
     let radius = 0.5 * extent.length();
 
     let (mut _camera, mut camera_transform) = camera_query.single_mut();
     *camera_transform =
         Transform::from_translation(center + Vec3::new(-1.2 * radius, 1.2 * radius, 2. * radius))
-            .looking_at(Vec3::ZERO, Vec3::Y);
+            .looking_at(center, Vec3::Y);
 }

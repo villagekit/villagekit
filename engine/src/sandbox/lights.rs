@@ -58,9 +58,6 @@ pub(crate) fn update_lights(
     sandbox_bounds: Res<SandboxBounds>,
     mut light_query: Query<(&mut PointLight, &mut Transform), With<SandboxLight>>,
 ) {
-    if !sandbox_bounds.is_changed() {
-        return;
-    };
     let SandboxBounds { center, extent } = sandbox_bounds.as_ref();
 
     let center = Vec3::from(*center);
