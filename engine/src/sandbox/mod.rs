@@ -10,8 +10,8 @@ use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridSettings};
 mod camera;
 mod lights;
 
-pub(crate) use camera::{setup_camera, update_camera};
-pub(crate) use lights::{setup_lights, update_lights};
+pub(crate) use camera::*;
+pub(crate) use lights::*;
 
 use crate::{ShapeObject, ShapesById};
 

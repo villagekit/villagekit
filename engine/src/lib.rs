@@ -41,7 +41,7 @@ impl Plugin for EnginePlugin {
         .add_systems(Update, update_sandbox_bounds)
         .add_systems(
             Update,
-            (update_lights, update_camera).run_if(resource_changed::<SandboxBounds>),
+            (update_camera).run_if(resource_changed::<SandboxBounds>),
         )
         .add_systems(Update, (process_products, process_renderables));
     }
