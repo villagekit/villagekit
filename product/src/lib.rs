@@ -1,7 +1,8 @@
+use bevy_math::{bounding::Aabb3d, Isometry3d};
 use dyn_clone::DynClone;
 use villagekit_math::Vector3;
 use villagekit_number::Number;
-use villagekit_render::{Renderable, Transform};
+use villagekit_render::{Bounded, Renderable, Transform};
 use villagekit_unit::{Angle, Length};
 
 pub trait Stock: DynClone {

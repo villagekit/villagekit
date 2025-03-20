@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-use crate::{Instance, Material, MaterialId, Shape, ShapeEnum, ShapeId};
+use crate::{Instance, Material, MaterialId, ShapeEnum, ShapeId};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Renderable {
@@ -11,7 +11,7 @@ pub struct Renderable {
 }
 
 impl Renderable {
-    pub fn insert_shape(&mut self, key: &str, shape: impl Shape) -> ShapeId {
+    pub fn insert_shape(&mut self, key: &str, shape: impl Into<ShapeEnum>) -> ShapeId {
         let id = ShapeId::new(key);
         self.shapes.insert(id.clone(), shape.into());
         id

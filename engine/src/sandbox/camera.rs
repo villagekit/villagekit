@@ -24,6 +24,7 @@ pub(crate) fn update_camera(
         return;
     };
     let SandboxBounds { center, extent } = sandbox_bounds.as_ref();
+    let center = Vec3::from(*center);
 
     println!("center: {}", center);
 

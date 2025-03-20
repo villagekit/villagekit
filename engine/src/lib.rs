@@ -33,6 +33,7 @@ impl Plugin for EnginePlugin {
             bevy_editor_cam::DefaultEditorCamPlugins,
             InfiniteGridPlugin,
         ))
+        .insert_resource(ShapesById::new())
         .insert_resource(AssetStore::<ShapeEnum, BevyMesh>::new())
         .insert_resource(AssetStore::<Material, BevyMaterial>::new())
         .insert_resource(SandboxBounds::default())

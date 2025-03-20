@@ -63,6 +63,7 @@ pub(crate) fn update_lights(
     };
     let SandboxBounds { center, extent } = sandbox_bounds.as_ref();
 
+    let center = Vec3::from(*center);
     let radius = 0.6_f32 * extent.length() + 2_f32;
     let range = 2_f32 * radius;
     let num_extra_lights = light_query.iter().len();

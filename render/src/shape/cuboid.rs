@@ -1,41 +1,25 @@
 use bevy_math::{
-    bounding::{Aabb3d, Bounded3d},
+    bounding::{Aabb3d, Bounded3d as BevyBounded},
     prelude::Cuboid as BevyCuboid,
     Isometry3d,
 };
-use bevy_render::mesh::{Mesh, Meshable, VertexAttributeValues};
-use enum_dispatch::enum_dispatch;
+use bevy_render::mesh::{Mesh, Meshable as BevyMeshable, VertexAttributeValues};
 use serde::{Deserialize, Serialize};
 use villagekit_unit::{Dimension, Length};
 
-use crate::Transform;
-
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ShapeId(String);
-
-impl ShapeId {
-    pub fn new(key: &str) -> Self {
-        Self(key.into())
-    }
-}
-
-#[enum_dispatch(ShapeEnum)]
-pub trait Shape: Into<ShapeEnum> {
-    fn mesh(&self) -> Mesh;
-    fn bounds(&self, transform: Transform) -> Aabb3d;
-}
-
-#[enum_dispatch]
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-pub enum ShapeEnum {
-    Cuboid(Cuboid),
-}
+use super::{Bounded, Meshable, ShapeEnum};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Cuboid {
     pub x_length: Length,
     pub y_length: Length,
     pub z_length: Length,
+}
+
+impl From<Cuboid> for ShapeEnum {
+    fn from(value: Cuboid) -> Self {
+        Self::Cuboid(value)
+    }
 }
 
 impl Cuboid {
@@ -48,7 +32,13 @@ impl Cuboid {
     }
 }
 
-impl Shape for Cuboid {
+impl Bounded for Cuboid {
+    fn bounds(&self, isometry: impl Into<Isometry3d>) -> Aabb3d {
+        self.to_bevy_shape().aabb_3d(isometry.into())
+    }
+}
+
+impl Meshable for Cuboid {
     fn mesh(&self) -> Mesh {
         let x_length = self.x_length.canonical().into();
         let y_length = self.y_length.canonical().into();
@@ -104,10 +94,5 @@ impl Shape for Cuboid {
         }
 
         mesh
-    }
-
-    fn bounds(&self, transform: Transform) -> Aabb3d {
-        let isometry: Isometry3d = transform.into();
-        self.to_bevy_shape().aabb_3d(isometry)
     }
 }

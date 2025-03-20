@@ -1,4 +1,10 @@
-use bevy::prelude::*;
+use bevy::{
+    math::{
+        bounding::{Aabb3d, BoundingVolume},
+        Vec3A,
+    },
+    prelude::*,
+};
 use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridSettings};
 
 mod camera;
@@ -7,24 +13,11 @@ mod lights;
 pub(crate) use camera::{setup_camera, update_camera};
 pub(crate) use lights::{setup_lights, update_lights};
 
+use crate::{ShapeObject, ShapesById};
+
 #[derive(Component, Default)]
 #[require(Transform, Visibility)]
 pub struct Sandbox;
-
-#[derive(Resource)]
-pub struct SandboxBounds {
-    center: Vec3,
-    extent: Vec3,
-}
-
-impl Default for SandboxBounds {
-    fn default() -> Self {
-        Self {
-            center: Vec3::new(0., 0., 0.),
-            extent: Vec3::new(1., 1., 1.),
-        }
-    }
-}
 
 pub(crate) fn setup_sandbox(mut commands: Commands) {
     // grid
@@ -45,36 +38,58 @@ pub(crate) fn setup_sandbox(mut commands: Commands) {
     ));
 }
 
+#[derive(Resource)]
+pub struct SandboxBounds {
+    center: Vec3A,
+    extent: Vec3A,
+}
+
+impl Default for SandboxBounds {
+    fn default() -> Self {
+        Self {
+            center: Vec3A::new(0., 0., 0.),
+            extent: Vec3A::new(1., 1., 1.),
+        }
+    }
+}
+
 pub(crate) fn update_sandbox_bounds(
     sandbox_query: Query<Entity, With<Sandbox>>,
     children_query: Query<&Children>,
-    transform_query: Query<&GlobalTransform>,
-    mut sandbox_bounds: ResMut<SandboxBounds>,
+    bounded_query: Query<(&ShapeObject, &GlobalTransform)>,
+    shapes_by_id: Res<ShapesById>,
+    mut current_sandbox_bounds: ResMut<SandboxBounds>,
 ) {
     let sandbox_entity = match sandbox_query.get_single() {
         Ok(entity) => entity,
         Err(_) => return,
     };
 
-    let mut min = Vec3::splat(f32::INFINITY);
-    let mut max = Vec3::splat(f32::NEG_INFINITY);
+    let mut sandbox_bounds = Aabb3d {
+        min: Vec3A::splat(f32::INFINITY),
+        max: Vec3A::splat(f32::NEG_INFINITY),
+    };
+
     for entity in children_query.iter_descendants(sandbox_entity) {
-        if let Ok(global_transform) = transform_query.get(entity) {
-            let pos = global_transform.translation();
-            min = min.min(pos);
-            max = max.max(pos);
+        if let Ok((entity_shape_id, entity_global_transform)) = bounded_query.get(entity) {
+            let isometry = entity_global_transform.to_isometry();
+            let entity_shape = shapes_by_id
+                .get(&entity_shape_id.0)
+                .expect("Failed to get shape");
+            let entity_bounds = entity_shape.bounds(isometry);
+            sandbox_bounds = sandbox_bounds.merge(&entity_bounds);
         }
     }
 
-    let center = 0.5_f32 * (min + max);
-    let extent = max - min;
+    let center = sandbox_bounds.center();
+    let extent = sandbox_bounds.min - sandbox_bounds.max;
 
     if !extent.is_finite() {
         return;
     };
 
-    if sandbox_bounds.center != center || sandbox_bounds.extent != extent {
-        sandbox_bounds.center = center;
-        sandbox_bounds.extent = extent;
+    if current_sandbox_bounds.center != center || current_sandbox_bounds.extent != extent {
+        current_sandbox_bounds.center = center;
+        current_sandbox_bounds.extent = extent;
     }
 }
