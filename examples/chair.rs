@@ -112,7 +112,7 @@ impl Stock for GridBeam {
         );
         let wood = r.insert_material(
             "wood",
-            Material {
+            StandardMaterial {
                 base_color_texture: Some(ImageId::new("./textures/wood.jpg")),
                 normal_map_texture: Some(ImageId::new("./textures/wood-normals.jpg")),
                 metallic: num!(0),

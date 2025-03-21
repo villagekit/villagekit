@@ -1,9 +1,9 @@
 use bevy::{prelude::*, utils::HashMap};
 use std::sync::Arc;
 use villagekit_render::{
-    ImageId, Instance as RenderableInstance, MaterialEnum as RenderableMaterial,
-    MaterialId as RenderableMaterialId, Renderable, ShapeEnum as RenderableShape,
-    ShapeId as RenderableShapeId,
+    BevyMaterialEnum, BevyMaterialHandleEnum, ImageId, Instance as RenderableInstance,
+    MaterialEnum as RenderableMaterial, MaterialId as RenderableMaterialId, Renderable,
+    ShapeEnum as RenderableShape, ShapeId as RenderableShapeId,
 };
 
 use crate::AssetStore;
@@ -44,9 +44,9 @@ pub(crate) fn process_renderables(
     query: Query<(Entity, &RenderableObject), Added<RenderableObject>>,
     mut shapes_by_id: ResMut<ShapesById>,
     mut mesh_assets: ResMut<Assets<Mesh>>,
-    mut material_assets: ResMut<Assets<StandardMaterial>>,
+    mut standard_material_assets: ResMut<Assets<StandardMaterial>>,
     mut mesh_store: ResMut<AssetStore<RenderableShape, Mesh>>,
-    mut material_store: ResMut<AssetStore<RenderableMaterial, StandardMaterial>>,
+    mut standard_material_store: ResMut<AssetStore<RenderableMaterial, StandardMaterial>>,
     server: Res<AssetServer>,
 ) {
     for (entity, object) in query.iter() {
@@ -57,7 +57,7 @@ pub(crate) fn process_renderables(
         } = &object.0;
 
         let mut meshes_by_id: HashMap<RenderableShapeId, Handle<Mesh>> = HashMap::new();
-        let mut materials_by_id: HashMap<RenderableMaterialId, Handle<StandardMaterial>> =
+        let mut materials_by_id: HashMap<RenderableMaterialId, BevyMaterialHandleEnum> =
             HashMap::new();
 
         for (id, shape) in shapes {
@@ -69,11 +69,16 @@ pub(crate) fn process_renderables(
         let get_image = |image_id: ImageId| server.load(image_id.as_ref());
 
         for (id, material) in materials {
-            let handle = material_store.insert(
-                material.clone(),
-                material.clone().to_bevy(get_image),
-                &mut material_assets,
-            );
+            let bevy_material = material.clone().to_bevy(get_image);
+            let handle = match bevy_material {
+                BevyMaterialEnum::Standard(standard_material) => {
+                    BevyMaterialHandleEnum::Standard(standard_material_store.insert(
+                        material.clone(),
+                        standard_material.clone(),
+                        &mut standard_material_assets,
+                    ))
+                }
+            };
             materials_by_id.insert(id.clone(), handle);
         }
 
@@ -94,7 +99,7 @@ fn spawn_renderable_instance(
     parent: &mut ChildBuilder,
     instance: RenderableInstance,
     meshes_by_id: &HashMap<RenderableShapeId, Handle<Mesh>>,
-    materials_by_id: &HashMap<RenderableMaterialId, Handle<StandardMaterial>>,
+    materials_by_id: &HashMap<RenderableMaterialId, BevyMaterialHandleEnum>,
 ) {
     let mesh_handle = meshes_by_id
         .get(&instance.shape)
@@ -103,10 +108,14 @@ fn spawn_renderable_instance(
         .get(&instance.material)
         .expect("Unable to get material by id");
 
+    let material_component = match material_handle {
+        BevyMaterialHandleEnum::Standard(handle) => MeshMaterial3d(handle.clone()),
+    };
+
     parent
         .spawn((
             Mesh3d(mesh_handle.clone()),
-            MeshMaterial3d(material_handle.clone()),
+            material_component,
             Transform::from(instance.transform),
             ShapeObject(instance.shape),
         ))

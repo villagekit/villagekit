@@ -1,7 +1,7 @@
 use bevy_asset::Handle;
 use bevy_image::Image;
 use bevy_pbr::{
-    Material as BevyMaterial, OpaqueRendererMethod as BevyOpaqueRenderMethod,
+    OpaqueRendererMethod as BevyOpaqueRenderMethod,
     ParallaxMappingMethod as BevyParallaxMappingMethod, StandardMaterial as BevyStandardMaterial,
     UvChannel as BevyUvChannel,
 };
@@ -25,6 +25,16 @@ impl MaterialId {
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum MaterialEnum {
     Standard(StandardMaterial),
+}
+
+#[derive(Debug, Clone)]
+pub enum BevyMaterialEnum {
+    Standard(BevyStandardMaterial),
+}
+
+#[derive(Debug, Clone)]
+pub enum BevyMaterialHandleEnum {
+    Standard(Handle<BevyStandardMaterial>),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -94,9 +104,9 @@ impl From<StandardMaterial> for MaterialEnum {
 }
 
 impl MaterialEnum {
-    pub fn to_bevy(self, get_image: impl Fn(ImageId) -> Handle<Image>) -> impl BevyMaterial {
+    pub fn to_bevy(self, get_image: impl Fn(ImageId) -> Handle<Image>) -> BevyMaterialEnum {
         match self {
-            MaterialEnum::Standard(value) => value.to_bevy(get_image),
+            MaterialEnum::Standard(value) => BevyMaterialEnum::Standard(value.to_bevy(get_image)),
         }
     }
 }
