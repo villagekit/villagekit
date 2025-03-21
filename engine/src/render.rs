@@ -1,7 +1,7 @@
 use bevy::{prelude::*, utils::HashMap};
 use std::sync::Arc;
 use villagekit_render::{
-    ImageId, Instance as RenderableInstance, Material as RenderableMaterial,
+    ImageId, Instance as RenderableInstance, MaterialEnum as RenderableMaterial,
     MaterialId as RenderableMaterialId, Renderable, ShapeEnum as RenderableShape,
     ShapeId as RenderableShapeId,
 };

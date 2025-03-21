@@ -1,8 +1,8 @@
 use bevy_asset::Handle;
 use bevy_image::Image;
 use bevy_pbr::{
-    OpaqueRendererMethod as BevyOpaqueRenderMethod,
-    ParallaxMappingMethod as BevyParallaxMappingMethod, StandardMaterial,
+    Material as BevyMaterial, OpaqueRendererMethod as BevyOpaqueRenderMethod,
+    ParallaxMappingMethod as BevyParallaxMappingMethod, StandardMaterial as BevyStandardMaterial,
     UvChannel as BevyUvChannel,
 };
 use bevy_render::{alpha::AlphaMode as BevyAlphaMode, render_resource::Face as BevyFace};
@@ -22,8 +22,13 @@ impl MaterialId {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-pub struct Material {
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub enum MaterialEnum {
+    Standard(StandardMaterial),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct StandardMaterial {
     pub base_color: Color,
     pub base_color_channel: UvChannel,
     pub base_color_texture: Option<ImageId>,
@@ -82,7 +87,21 @@ pub struct Material {
     pub uv_transform: Affine2<Number>,
 }
 
-impl Default for Material {
+impl From<StandardMaterial> for MaterialEnum {
+    fn from(value: StandardMaterial) -> Self {
+        MaterialEnum::Standard(value)
+    }
+}
+
+impl MaterialEnum {
+    pub fn to_bevy(self, get_image: impl Fn(ImageId) -> Handle<Image>) -> impl BevyMaterial {
+        match self {
+            MaterialEnum::Standard(value) => value.to_bevy(get_image),
+        }
+    }
+}
+
+impl Default for StandardMaterial {
     fn default() -> Self {
         Self {
             base_color: Color::WHITE,
@@ -130,11 +149,11 @@ impl Default for Material {
     }
 }
 
-impl Material {
+impl StandardMaterial {
     /// Converts this custom Material into Bevy's StandardMaterial.
     /// The `get_image` function is used to convert an ImageId to a Handle<Image>.
-    pub fn to_bevy(self, get_image: impl Fn(ImageId) -> Handle<Image>) -> StandardMaterial {
-        StandardMaterial {
+    pub fn to_bevy(self, get_image: impl Fn(ImageId) -> Handle<Image>) -> BevyStandardMaterial {
+        BevyStandardMaterial {
             base_color: self.base_color.into(),
             base_color_channel: self.base_color_channel.into(),
             base_color_texture: self.base_color_texture.map(&get_image),

@@ -5,7 +5,7 @@ use bevy_infinite_grid::InfiniteGridPlugin;
 use villagekit_product::Assembly;
 use villagekit_product::ProductKind;
 use villagekit_product::Stock;
-use villagekit_render::{Material, ShapeEnum};
+use villagekit_render::{MaterialEnum, ShapeEnum};
 
 mod assets;
 mod product;
@@ -35,7 +35,7 @@ impl Plugin for EnginePlugin {
         ))
         .insert_resource(ShapesById::new())
         .insert_resource(AssetStore::<ShapeEnum, BevyMesh>::new())
-        .insert_resource(AssetStore::<Material, BevyMaterial>::new())
+        .insert_resource(AssetStore::<MaterialEnum, BevyMaterial>::new())
         .insert_resource(SandboxBounds::default())
         .add_systems(Startup, (setup_sandbox, setup_lights, setup_camera))
         .add_systems(Update, update_sandbox_bounds)

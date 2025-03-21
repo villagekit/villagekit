@@ -1,5 +1,5 @@
 use bevy_math::{
-    bounding::{Aabb3d, Bounded3d as BevyBounded},
+    bounding::{Aabb3d, Bounded3d as BevyBounded3d},
     prelude::Cuboid as BevyCuboid,
     Isometry3d,
 };
@@ -7,7 +7,7 @@ use bevy_render::mesh::{Mesh, Meshable as BevyMeshable, VertexAttributeValues};
 use serde::{Deserialize, Serialize};
 use villagekit_unit::{Dimension, Length};
 
-use super::{Bounded, Meshable, ShapeEnum};
+use super::{Bounded3d, Meshable, ShapeEnum};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Cuboid {
@@ -22,19 +22,19 @@ impl From<Cuboid> for ShapeEnum {
     }
 }
 
-impl Cuboid {
-    fn to_bevy_shape(&self) -> BevyCuboid {
-        BevyCuboid::new(
-            self.x_length.canonical().into(),
-            self.y_length.canonical().into(),
-            self.z_length.canonical().into(),
+impl From<&Cuboid> for BevyCuboid {
+    fn from(value: &Cuboid) -> Self {
+        Self::new(
+            value.x_length.canonical().into(),
+            value.y_length.canonical().into(),
+            value.z_length.canonical().into(),
         )
     }
 }
 
-impl Bounded for Cuboid {
+impl Bounded3d for Cuboid {
     fn bounds(&self, isometry: impl Into<Isometry3d>) -> Aabb3d {
-        self.to_bevy_shape().aabb_3d(isometry.into())
+        BevyCuboid::from(self).aabb_3d(isometry)
     }
 }
 
@@ -44,7 +44,7 @@ impl Meshable for Cuboid {
         let y_length = self.y_length.canonical().into();
         let z_length = self.z_length.canonical().into();
 
-        let mut mesh: Mesh = self.to_bevy_shape().mesh().into();
+        let mut mesh: Mesh = BevyCuboid::from(self).mesh().into();
 
         // Map UVs from (0, 0) -> (1, 1) to world units
         if let Some(VertexAttributeValues::Float32x2(ref mut uvs)) =

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ImageId(PathBuf);
 
 impl ImageId {
