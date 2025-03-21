@@ -45,6 +45,7 @@ struct GridBeam {
 
 impl GridBeam {
     const GRID_UNIT: Length = qty!(40 mm);
+    const HOLE_DIAMETER: Length = qty!(8 mm);
 
     fn x(x: (Number, Number), y: Number, z: Number) -> Product {
         let length = (x.0 - x.1).abs();
@@ -102,8 +103,8 @@ impl GridBeam {
 impl Stock for GridBeam {
     fn render(&self) -> Renderable {
         let mut r = Renderable::default();
-        let cube = r.insert_shape(
-            "cube",
+        let beam = r.insert_shape(
+            "beam",
             Cuboid {
                 x_length: self.length * Self::GRID_UNIT,
                 y_length: Self::GRID_UNIT,
@@ -123,7 +124,7 @@ impl Stock for GridBeam {
             },
         );
         r.insert_instance(Instance {
-            shape: cube,
+            shape: beam,
             material: wood,
             transform: Transform::default().translate(
                 num!(0.5) * (self.length - num!(1)) * Self::GRID_UNIT,
@@ -132,6 +133,48 @@ impl Stock for GridBeam {
             ),
             children: vec![],
         });
+
+        let hole = r.insert_shape(
+            "hole",
+            Circle {
+                radius: num!(0.5) * Self::HOLE_DIAMETER,
+            },
+        );
+        let black = r.insert_material(
+            "black",
+            StandardMaterial {
+                base_color: Color::BLACK,
+                ..Default::default()
+            },
+        );
+        // TODO improve self.length.0.try_into().unwrap()
+        for hole_index in 0..self.length.0.try_into().unwrap() {
+            r.insert_instance(Instance {
+                shape: hole.clone(),
+                material: black.clone(),
+                transform: Transform::default()
+                    .rotate(X_AXIS, -Rotations::QUARTER, None)
+                    .translate(
+                        Number::from(hole_index) * Self::GRID_UNIT,
+                        num!(0.5) * Self::GRID_UNIT + qty!(0.1 mm),
+                        Length::zero(),
+                    ),
+                children: vec![],
+            });
+            r.insert_instance(Instance {
+                shape: hole.clone(),
+                material: black.clone(),
+                transform: Transform::default()
+                    .rotate(X_AXIS, Rotations::QUARTER, None)
+                    .translate(
+                        Number::from(hole_index) * Self::GRID_UNIT,
+                        -num!(0.5) * Self::GRID_UNIT - qty!(0.1 mm),
+                        Length::zero(),
+                    ),
+                children: vec![],
+            });
+        }
+
         r
     }
 }

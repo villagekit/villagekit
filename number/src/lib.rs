@@ -61,6 +61,12 @@ impl Number {
     }
 }
 
+impl From<usize> for Number {
+    fn from(value: usize) -> Self {
+        Number(value.into())
+    }
+}
+
 impl From<Number> for f32 {
     fn from(value: Number) -> Self {
         value.0.into()
